@@ -1,9 +1,11 @@
-import React from 'react'
-
+import React from 'react';
+import NavBar from '../../components/Layouts/NavBar';
+import Hero from './Hero'
 const Landing = () => {
   return (
     <div>
-      hello
+     <NavBar />
+     <Hero />
     </div>
   )
 }
