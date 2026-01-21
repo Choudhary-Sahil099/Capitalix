@@ -1,8 +1,34 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+*{
+  font-family: "Inter", sans-serif;
+}
 
+.hero-bg {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      800px circle at 70% 40%,
+      rgba(168, 85, 247, 0.35),
+      transparent 60%
+    ),
+    radial-gradient(
+      600px circle at 20% 20%,
+      rgba(139, 92, 246, 0.25),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      #0b0616 0%,
+      #120a23 50%,
+      #07020f 100%
+    );
+  overflow: hidden;
+}
 
-.nav{
-  height: 10;
-  width: 100vw;
-  border: 2px solid black;
+@layer components{
+  .hero-section{
+    @apply bg-[#081028] w-full min-h-min px-20 flex py-17
+  }
 }
