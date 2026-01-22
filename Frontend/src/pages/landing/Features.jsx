@@ -2,7 +2,7 @@ import React from 'react'
 
 const Features = () => {
   return (
-    <section className='min-h-min w-full flex flex-col bg-[#081028] px-20 pt-20 gap-12'>
+    <section className='min-h-min w-full flex flex-col bg-[#000000] px-20 pt-20 gap-12'>
       <div className='text-center'>
         <h1 className='text-white text-6xl'>Invest Smart from Day One —<br/> Zero Investment Required</h1>
       </div>
@@ -17,7 +17,7 @@ const Features = () => {
         <div className='h-100 w-full border border-white rounded-2xl'></div>
         <div className='h-100 w-full border border-white rounded-2xl'></div>
       </div>
-      <div >
+      <div className='flex justify-center items-center'>
         <button className='h-10 bg-[#CB3CFF] w-40 text-white rounded-md text-center text-md flex justify-center items-center'>Explore</button>
       </div>
     </section>

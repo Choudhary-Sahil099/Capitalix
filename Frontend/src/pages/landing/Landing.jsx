@@ -2,6 +2,7 @@ import React from 'react';
 import NavBar from '../../components/Layouts/NavBar';
 import Hero from './Hero'
 import Features from './Features';
+import CTA from './CTA';
 
 const Landing = () => {
   return (
@@ -9,6 +10,7 @@ const Landing = () => {
      <NavBar />
      <Hero />
      <Features />
+     <CTA />
     </div>
   )
 }
