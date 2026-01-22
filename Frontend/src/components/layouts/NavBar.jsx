@@ -8,9 +8,9 @@ const NavBar = () => {
         <img src={Logo}/>
       </div>
       <div className='flex justify-center items-center gap-3'>
-        <button className='h-10 bg-[#838283] w-40 text-white rounded-md text-center text-md flex justify-center items-center'>Open An Account</button>
-        <button className='h-10 bg-[#CB3CFF] w-23 text-white rounded-md text-center text-md flex justify-center items-center'>Log In</button>
-        <button className='h-10 bg-[#CB3CFF] w-15 text-white rounded-md text-center text-md flex justify-center items-center'><Menu className='w-20' /></button> 
+        <button className='h-10 border w-40 text-white rounded-md text-center text-md flex justify-center items-center'>Open An Account</button>
+        <button className='h-10 bg-[#835fdf] w-23 text-white rounded-md text-center text-md flex justify-center items-center'>Log In</button>
+        <button className='h-10 w-15 text-white rounded-md text-center text-md flex justify-center items-center'><Menu className='w-15 h-8' /></button> 
       </div>
     </div>
   );
