@@ -1,6 +1,6 @@
 import React from 'react'
 
-const CTA = () => {
+const CTA = ({onSignClick}) => {
   return (
     <footer className="bg-[#000000] text-[#94A3B8] px-20 pt-16 pb-2">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/10 pb-3">
@@ -48,7 +48,7 @@ const CTA = () => {
             <p className="text-sm mb-3 text-white">
               Start building your investment skills today.
             </p>
-            <button className="bg-white text-[#081028] px-5 py-2 rounded-md text-sm font-semibold hover:bg-gray-200 transition">
+            <button className="bg-white text-[#081028] px-5 py-2 rounded-md text-sm font-semibold hover:bg-gray-200 transition" onClick={onSignClick}>
               Start Paper Trading →
             </button>
           </div>

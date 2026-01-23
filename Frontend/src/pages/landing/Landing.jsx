@@ -31,10 +31,10 @@ const Landing = () => {
      <NavBar onLoginClick={openLogin}  onSignClick={openSignup}/>
      <Hero />
      <Features />
-     <CTA />
+     <CTA onSignClick={openSignup}/>
     </div>
-     {showLogin && <Login setShowLogin={closeAll} />}
-     {showSignUp && <Signup setShowSignUp={closeAll} />}
+     {showLogin && <Login setShowLogin={closeAll} openSignup={openSignup}/>}
+     {showSignUp && <Signup setShowSignUp={closeAll} openLogin={openLogin}/>}
     </>
   )
 }
