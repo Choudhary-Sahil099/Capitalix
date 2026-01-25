@@ -2,7 +2,7 @@ import React from "react";
 
 const Features = () => {
   return (
-    <section className="min-h-min w-full flex flex-col bg-[#000000] px-20 pt-20 gap-12">
+    <section id="features" className="min-h-min w-full flex flex-col bg-[#000000] px-20 pt-20 gap-12">
       <div className="text-center">
         <h1 className="text-white text-6xl">
           Invest Smart from Day One —<br />{" "}
