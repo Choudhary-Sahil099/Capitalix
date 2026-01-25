@@ -1,5 +1,4 @@
 import Landing from "./pages/Landing/Landing";
-import Menu from "./components/layouts/MenuBar"
 
 function App() {
   return (

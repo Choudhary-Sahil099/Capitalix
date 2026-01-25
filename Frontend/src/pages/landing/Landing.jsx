@@ -29,7 +29,7 @@ const Landing = () => {
     <>
     <div className={isModalOpen ? "blur-sm transition-all duration-200" : ""}>
      <NavBar onLoginClick={openLogin}  onSignClick={openSignup}/>
-     <Hero />
+     <Hero onSignClick={openSignup}/>
      <Features />
      <CTA onSignClick={openSignup}/>
     </div>

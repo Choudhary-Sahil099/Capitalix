@@ -14,7 +14,7 @@ const Features = () => {
           href="#"
           class="feature-a"
         >
-          Features
+          Smart Investing
         </a>
         <a href="" class="feature-a">Secure Assets</a>
         <a href="" class="feature-a">Real-Time Tracking</a>
