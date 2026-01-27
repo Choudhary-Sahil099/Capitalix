@@ -1,6 +1,14 @@
-import React from "react";
+import {useState} from "react";
+import SmartInvesting from "./SmartInvesting";
+import Secure from "./Secure";
+import Tracking from "./Tracking";
+import Planning from "./Planing";
+
+
+
 
 const Features = () => {
+  const [activeFeature , setActiveFeature] = useState("investing");
   return (
     <section id="features" className="min-h-min w-full flex flex-col bg-[#000000] px-20 pt-20 gap-12">
       <div className="text-center">
@@ -10,20 +18,18 @@ const Features = () => {
         </h1>
       </div>
       <div className="flex justify-center items-center gap-25 text-xl pt-8 text-white">
-        <a
-          href="#"
-          class="feature-a"
-        >
-          Smart Investing
-        </a>
-        <a href="" class="feature-a">Secure Assets</a>
-        <a href="" class="feature-a">Real-Time Tracking</a>
-        <a href="" class="feature-a">Easy Planing</a>
+       <button onClick={() => setActiveFeature("investing")} className={`feature-a ${activeFeature === "investing" ? "text-[#919191]" : ""}`}>Smart Investing</button>
+       <button onClick={() => setActiveFeature("secure")} className={`feature-a ${activeFeature === "secure" ? "text-[#919191]" : ""}`}>Secure Assets</button>
+       <button onClick={() => setActiveFeature("tracking")} className={`feature-a ${activeFeature === "tracking" ? "text-[#919191]" : ""}`}>Real-Time Tracking</button>
+       <button onClick={() => setActiveFeature("planning")} className={`feature-a ${activeFeature === "planning" ? "text-[#919191]" : ""}`}>Easy Planning</button>
+
       </div>
-      <div className="flex gap-10">
-        <div className="h-100 w-full border border-white rounded-2xl"></div>
-        <div className="h-100 w-full border border-white rounded-2xl"></div>
-        <div className="h-100 w-full border border-white rounded-2xl"></div>
+      <div>
+        {activeFeature === 'investing' && <SmartInvesting />}
+        {activeFeature === 'secure' && <Secure />}
+        {activeFeature === 'tracking' && <Tracking />}
+        {activeFeature === 'planning' && <Planning />}
+
       </div>
       <div className="flex justify-center items-center">
         <button className="h-10 bg-[#CB3CFF] w-40 text-white rounded-md text-center text-md flex justify-center items-center">
