@@ -5,7 +5,6 @@ function App() {
   return (
     <div>
       <Landing />
-      <ForgotPassword />
     </div>
   );
 }

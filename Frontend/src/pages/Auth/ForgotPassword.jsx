@@ -1,10 +1,17 @@
 import React from 'react'
 import Logo from '../../assets/logo.png'
+import { X } from 'lucide-react';
 
-const ForgotPassword = () => {
+const ForgotPassword = ({onBack, onClose}) => {
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm'>
-      <div className='bg-transparent p-8 rounded-xl border border-white min-h-min w-100'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm' onClick={onClose}>
+      <div className='bg-transparent p-8 rounded-xl border relative border-white min-h-min w-100 ' onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-white text-xl hover:cursor-pointer "
+        >
+          <X />
+        </button>
         <div className='text-white flex flex-col justify-center items-center gap-1'>
             <img src={Logo} className='w-50 h-20'/>
             <h2 className='text-3xl'>Forgot Password</h2>
@@ -17,7 +24,7 @@ const ForgotPassword = () => {
           className="w-full mb-4 p-3 rounded border border-[#717171] text-white"
         />
         </div>
-        <h1 className='text-center text-[#3a0bf6] hover:cursor-pointer'>Back to login</h1>
+        <h1 className='text-center text-[#3a0bf6] hover:cursor-pointer' onClick={onBack}>Back to login</h1>
         <div className='flex justify-center items-center mt-6'>
             <button className='bg-[#835fdf] w-40 h-10 rounded-xl text-white'>
             Send

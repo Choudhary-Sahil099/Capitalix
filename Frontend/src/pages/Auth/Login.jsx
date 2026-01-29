@@ -1,7 +1,14 @@
-import React, { useEffect } from 'react'
+import React, { useEffect,useState } from 'react'
 import { X } from 'lucide-react';
 import Logo from '../../assets/logo.png'
+import ForgotPassword from './ForgotPassword';
 const Login = ({ setShowLogin, openSignup }) => {
+  const [forgot, setForgot] = useState(false);
+  if(forgot){
+    return(
+      <ForgotPassword onBack={() =>setForgot(false)} onClose={() =>setShowLogin(false)} />
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLogin(false)}>
@@ -34,6 +41,7 @@ const Login = ({ setShowLogin, openSignup }) => {
           placeholder="Enter your password...."
           className="w-full mb-4 p-3 rounded border border-[#717171] text-white"
         />
+        <span className='text-white text-right hover:cursor-pointer' onClick={() =>setForgot(true)}>Forgot passord?</span>
         </div>
 
         <button className="w-full bg-[#835fdf] py-3 rounded text-white font-semibold mt-6">
