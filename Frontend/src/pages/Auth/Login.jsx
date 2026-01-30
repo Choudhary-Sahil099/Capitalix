@@ -26,11 +26,7 @@ const Login = ({ setShowLogin, openSignup }) => {
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-
-        // ✅ CLOSE MODAL FIRST
         setShowLogin(false);
-
-        // ✅ THEN NAVIGATE
         navigate("/dashboard");
       } else {
         alert(data.message || "Login failed");
@@ -57,9 +53,9 @@ const Login = ({ setShowLogin, openSignup }) => {
       onClick={() => setShowLogin(false)}
     >
       <form
-        className="bg-transparent p-8 rounded-xl w-[400px] relative border border-white"
+        className="bg-transparent p-8 rounded-xl w-100 relative border border-white"
         onSubmit={handleSubmit}
-        onClick={(e) => e.stopPropagation()} // ✅ prevents auto-close
+        onClick={(e) => e.stopPropagation()} 
       >
         <button
           type="button"
@@ -78,7 +74,7 @@ const Login = ({ setShowLogin, openSignup }) => {
           <h4 className="text-white text-xl">Email</h4>
           <input
             type="email"
-            name="email"               // ✅ REQUIRED
+            name="email"      
             placeholder="Enter your email..."
             className="w-full mb-4 p-3 rounded border border-[#717171] text-white bg-transparent"
             onChange={handleChange}
@@ -90,7 +86,7 @@ const Login = ({ setShowLogin, openSignup }) => {
           <h4 className="text-white text-xl">Password</h4>
           <input
             type="password"
-            name="password"            // ✅ REQUIRED
+            name="password"    
             placeholder="Enter your password..."
             className="w-full mb-4 p-3 rounded border border-[#717171] text-white bg-transparent"
             onChange={handleChange}
