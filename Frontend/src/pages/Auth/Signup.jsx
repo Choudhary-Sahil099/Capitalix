@@ -46,7 +46,7 @@ const Signup = ({setShowSignUp, openLogin}) => {
         </div>
 
         <button className="w-full bg-[#835fdf] py-3 rounded text-white font-semibold mt-6">
-          Login
+          Sign in
         </button>
         <h2 className='mt-2 text-center text-white'>Already have a account?<span className='text-[#3a0bf6] hover:cursor-pointer hover:underline' onClick={openLogin}>Login</span></h2>
       </div>
