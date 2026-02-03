@@ -2,7 +2,7 @@ import React from 'react'
 
 const NotificationPannel = () => {
   return (
-    <div>
+    <div className='w-40 h-50 bg-amber-50'>
       
     </div>
   )

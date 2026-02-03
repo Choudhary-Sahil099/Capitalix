@@ -1,3 +1,12 @@
+import React from 'react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 const UserGraph = () => {
   const data = [
     { name: "Mon", value: 400 },
@@ -10,11 +19,9 @@ const UserGraph = () => {
   ];
 
   return (
-    <div className="bg-[#0e0d0d] rounded-xl p-4 h-96 w-full flex flex-col">
-      <h2 className="text-white text-3xl mb-4">Portfolio Value</h2>
-
-      {/* chart wrapper */}
-      <div className="flex-1">
+    <div className="bg-[#0e0d0d] rounded-xl p-4 h-110 w-full flex flex-col">
+      <h2 className="text-white text-3xl mb-4 ">Portfolio Value<br/>₹ 11,20,302</h2>
+      <div className="flex-1 w-230 h-110">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <XAxis dataKey="name" stroke="#aaa" />
@@ -32,4 +39,7 @@ const UserGraph = () => {
       </div>
     </div>
   );
-};
+}
+
+export default UserGraph
+
