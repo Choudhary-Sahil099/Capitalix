@@ -9,7 +9,9 @@ import {
   Compass,
   Eye,
   UserRoundPen,
-  Settings
+  Settings,
+  HelpCircle,
+  LifeBuoy, 
 } from "lucide-react";
 
 const SideBar = () => {
@@ -25,6 +27,8 @@ const SideBar = () => {
   const ProfileItems = [
     { label: "Account", icon: UserRoundPen},
     { label: "Settings", icon: Settings },
+    {label : "FAQ", icon:HelpCircle},
+    {label : "Help", icon: LifeBuoy},
   ];
   return (
     <div className="min-h-screen w-59 flex flex-col gap-3">
@@ -47,7 +51,7 @@ const SideBar = () => {
         </div>
       </div>
       <div></div>
-      <div className="min-h-min bg-[#0e0d0d] p-4 rounded-tr-xl">
+      <div className="h-49 bg-[#0e0d0d] px-4 rounded-tr-xl rounded-br-xl">
         <div className="flex flex-col p-2">
           {ProfileItems.map(({label,icon:Icon}) => (
             <button
