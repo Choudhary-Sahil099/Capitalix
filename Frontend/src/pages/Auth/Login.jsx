@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import Logo from "../../assets/logo.png";
 import ForgotPassword from "./ForgotPassword";
-import { loginUser } from "../../services/authService";
+import { loginUser } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 
 const Login = ({ setShowLogin, openSignup }) => {

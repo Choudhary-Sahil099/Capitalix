@@ -1,23 +1,28 @@
 import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing/Landing";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import DashboardLayout from "./pages/Dashboard/DashboardLayout";
+import Watchlist from "./pages/Watchlist/Watchlist";
 import ProtectedRoute from "./components/layouts/ProtectedRoutes";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="watchlist" element={<Watchlist />} />
+      </Route>
     </Routes>
   );
 }
 
 export default App;
-

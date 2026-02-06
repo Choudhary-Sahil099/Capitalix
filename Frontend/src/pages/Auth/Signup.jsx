@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import Logo from "../../assets/logo.png";
 import { useNavigate } from "react-router-dom";
-import { signupUser } from "../../services/authService";
+import { signupUser } from "../services/authService";
 
 const Signup = ({ setShowSignUp, openLogin }) => {
   const [form, setForm] = useState({

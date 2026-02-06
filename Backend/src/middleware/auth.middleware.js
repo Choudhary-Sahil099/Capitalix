@@ -4,8 +4,6 @@ import User from "../models/User.js";
 const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-
-    // Expect: "Bearer <token>"
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -20,7 +18,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: "User not found" });
     }
 
-    req.user = user; // 🔥 attach user to request
+    req.user = user;
     next();
   } catch (error) {
     console.error(error);
