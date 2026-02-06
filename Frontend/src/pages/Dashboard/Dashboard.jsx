@@ -1,5 +1,5 @@
 import React from 'react';
-import TopSearch from '../../components/dashboard/TopSearch';
+import TopSearch from '../../components/layouts/TopSearch';
 import UserGraph from '../../components/dashboard/UserGraph';
 import TransactionHistory from '../../components/dashboard/TransactionHistory';
 import CurrentWatchlist from '../../components/dashboard/CurrentWatchlist';

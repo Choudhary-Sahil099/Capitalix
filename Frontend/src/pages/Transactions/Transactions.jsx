@@ -1,14 +1,14 @@
 import React from 'react'
-import WatchlistBox from '../../components/watchlist/WatchlistBox'
 import TopSearch from '../../components/layouts/TopSearch'
+import TransactionRec from '../../components/transactions/TransactionRec'
 
-const Watchlist = () => {
+const Transactions = () => {
   return (
     <div className='flex flex-col gap-4'>
       <TopSearch />
-      <WatchlistBox />
+      <TransactionRec />
     </div>
   )
 }
 
-export default Watchlist
+export default Transactions

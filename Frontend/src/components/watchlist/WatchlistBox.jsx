@@ -1,146 +1,122 @@
 import React, { useState } from "react";
-import { Layers, Filter, Calendar, Download } from "lucide-react";
+import { Plus, Filter } from "lucide-react";
 
-export const transactions = [
-  {
-    id: 1,
-    type: "Buy",
-    asset: "AAPL",
-    assetName: "Apple Inc.",
-    quantity: 10,
-    price: 182.45,
-    total: 1824.5,
-    status: "Completed",
-    date: "2026-02-04",
-    time: "10:15 AM",
-  },
-  {
-    id: 2,
-    type: "Sell",
-    asset: "TSLA",
-    assetName: "Tesla Inc.",
-    quantity: 5,
-    price: 238.12,
-    total: 1190.6,
-    status: "Completed",
-    date: "2026-02-03",
-    time: "02:40 PM",
-  },
-  {
-    id: 3,
-    type: "Buy",
-    asset: "BTC",
-    assetName: "Bitcoin",
-    quantity: 0.02,
-    price: 43120,
-    total: 862.4,
-    status: "Completed",
-    date: "2026-02-03",
-    time: "11:05 AM",
-  },
-  {
-    id: 4,
-    type: "Buy",
-    asset: "ETH",
-    assetName: "Ethereum",
-    quantity: 0.5,
-    price: 2280,
-    total: 1140,
-    status: "Pending",
-    date: "2026-02-02",
-    time: "06:20 PM",
-  },
-  {
-    id: 5,
-    type: "Sell",
-    asset: "NFLX",
-    assetName: "Netflix Inc.",
-    quantity: 3,
-    price: 512.3,
-    total: 1536.9,
-    status: "Completed",
-    date: "2026-02-02",
-    time: "01:10 PM",
-  },
-  {
-    id: 6,
-    type: "Buy",
-    asset: "AMZN",
-    assetName: "Amazon.com Inc.",
-    quantity: 2,
-    price: 165.8,
-    total: 331.6,
-    status: "Completed",
-    date: "2026-02-01",
-    time: "04:55 PM",
-  },
-  {
-    id: 7,
-    type: "Sell",
-    asset: "SOL",
-    assetName: "Solana",
-    quantity: 12,
-    price: 98.4,
-    total: 1180.8,
-    status: "Completed",
-    date: "2026-02-01",
-    time: "12:30 PM",
-  },
-  {
-    id: 8,
-    type: "Buy",
-    asset: "GOOGL",
-    assetName: "Alphabet Inc.",
-    quantity: 4,
-    price: 142.75,
-    total: 571,
-    status: "Completed",
-    date: "2026-01-31",
-    time: "03:05 PM",
-  },
-  {
-    id: 9,
-    type: "Buy",
-    asset: "MSFT",
-    assetName: "Microsoft Corp.",
-    quantity: 6,
-    price: 376.2,
-    total: 2257.2,
-    status: "Failed",
-    date: "2026-01-31",
-    time: "11:50 AM",
-  },
-  {
-    id: 10,
-    type: "Sell",
-    asset: "ADA",
-    assetName: "Cardano",
-    quantity: 500,
-    price: 0.62,
-    total: 310,
-    status: "Completed",
-    date: "2026-01-30",
-    time: "09:40 AM",
-  },
-];
+export const WATCHLIST_DATA = {
+  Watchlist1: [
+    {
+      id: 1,
+      asset: "AAPL",
+      assetName: "Apple Inc.",
+      quantity: 10,
+      marketPrice: 185.2,
+      invested: 1700,
+      current: 1852,
+      returns: {
+        value: 152,
+        percent: 8.94,
+      },
+    },
+    {
+      id: 2,
+      asset: "TSLA",
+      assetName: "Tesla Inc.",
+      quantity: 5,
+      marketPrice: 240.6,
+      invested: 1100,
+      current: 1203,
+      returns: {
+        value: 103,
+        percent: 9.36,
+      },
+    },
+    {
+      id: 3,
+      asset: "MSFT",
+      assetName: "Microsoft Corp.",
+      quantity: 6,
+      marketPrice: 378.4,
+      invested: 2100,
+      current: 2270.4,
+      returns: {
+        value: 170.4,
+        percent: 8.11,
+      },
+    },
+  ],
+
+  Watchlist2: [
+    {
+      id: 4,
+      asset: "BTC",
+      assetName: "Bitcoin",
+      quantity: 0.05,
+      marketPrice: 43250,
+      invested: 2000,
+      current: 2162.5,
+      returns: {
+        value: 162.5,
+        percent: 8.12,
+      },
+    },
+    {
+      id: 5,
+      asset: "ETH",
+      assetName: "Ethereum",
+      quantity: 0.8,
+      marketPrice: 2290,
+      invested: 1600,
+      current: 1832,
+      returns: {
+        value: 232,
+        percent: 14.5,
+      },
+    },
+    {
+      id: 6,
+      asset: "SOL",
+      assetName: "Solana",
+      quantity: 15,
+      marketPrice: 98.6,
+      invested: 1200,
+      current: 1479,
+      returns: {
+        value: -279,
+        percent: 23.25,
+      },
+    },
+  ],
+};
 
 const WatchlistBox = () => {
   const [range, setRange] = useState("All Categories");
-
+  const [activeWatchlist, setActiveWatchlist] = useState("Watchlist1");
+  const currentWatchlist = WATCHLIST_DATA[activeWatchlist] || [];
+  const numbers = ["Watchlist1", "Watchlist2"];
   const filters = [
-    { label: "All Categories", icon: Layers },
+    { label: "Add New", icon: Plus },
     { label: "Filter", icon: Filter },
-    { label: "This Year", icon: Calendar },
-    { label: "Export", icon: Download },
   ];
 
   return (
-    <div className="w-full h-168 rounded-xl bg-[#0e0d0d] flex flex-col p-6">
+    <div className="flex gap-4">
+      <div className="w-230 h-168 rounded-xl bg-[#0e0d0d] flex flex-col p-6">
       <div className="flex justify-between items-center px-3 pb-4 border-b border-white/5">
-        <input
-          className="bg-black w-50 h-10 rounded-md text-white p-4 outline-none placeholder:text-gray-500"
-          placeholder="Search"
-        />
+        <div className="flex gap-3">
+          {numbers.map((item) => (
+            <button
+              key={item}
+              onClick={() => setActiveWatchlist(item)}
+              className={`text-sm px-4 py-2 rounded-lg transition
+        ${
+          activeWatchlist === item
+            ? "bg-indigo-500 text-white"
+            : "text-gray-400 hover:bg-[#222]"
+        }`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
         <div className="flex gap-2 bg-[#141414] p-1 rounded-xl">
           {filters.map(({ label, icon: Icon }) => (
             <button
@@ -166,21 +142,22 @@ const WatchlistBox = () => {
              border-b border-white/5"
       >
         <span>Asset</span>
-        <span>Date & Time</span>
-        <span>Type</span>
-        <span>Qty</span>
-        <span>Total</span>
-        <span>Status</span>
+        <span>Quantity</span>
+        <span>Mkt. Prize</span>
+        <span>Invested</span>
+        <span>Current</span>
+        <span>Return</span>
       </div>
       <div className="flex-1 overflow-y-auto mt-3 pr-2 hide-scrollbar">
         <div className="flex flex-col gap-3">
-          {transactions.map((tx) => (
+          {currentWatchlist.map((tx) => (
             <div
               key={tx.id}
               className="grid grid-cols-[2.5fr_1.5fr_1fr_0.8fr_1fr_1fr]
-                   items-center bg-[#141414] px-4 py-3 rounded-lg
-                   hover:bg-[#1a1a1a] transition"
+           items-center bg-[#141414] px-4 py-3 rounded-lg
+           hover:bg-[#1a1a1a] transition"
             >
+              {/* Asset */}
               <div className="flex flex-col">
                 <span className="text-white font-medium truncate">
                   {tx.asset}
@@ -189,39 +166,39 @@ const WatchlistBox = () => {
                   </span>
                 </span>
               </div>
-              <div className="flex flex-col text-sm text-gray-400">
-                <span>{tx.date}</span>
-                <span className="text-xs">{tx.time}</span>
-              </div>
-
-              <span
-                className={`text-sm font-semibold ${
-                  tx.type === "Buy" ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {tx.type}
-              </span>
               <span className="text-sm text-gray-300">{tx.quantity}</span>
-
+              <span className="text-sm text-gray-300">
+                ${tx.marketPrice.toLocaleString()}
+              </span>
+              <span className="text-sm text-gray-300">
+                ${tx.invested.toLocaleString()}
+              </span>
               <span className="text-sm text-white font-medium">
-                ${tx.total.toLocaleString()}
+                ${tx.current.toLocaleString()}
               </span>
               <span
-                className={`text-xs font-semibold px-2 py-1 rounded-md w-fit
-            ${
-              tx.status === "Completed"
-                ? "bg-green-500/10 text-green-500"
-                : tx.status === "Pending"
-                  ? "bg-yellow-500/10 text-yellow-500"
-                  : "bg-red-500/10 text-red-500"
-            }`}
+                className={`text-sm font-semibold
+        ${tx.returns.value >= 0 ? "text-green-500" : "text-red-500"}`}
               >
-                {tx.status}
+                {tx.returns.value >= 0 ? "+" : ""}
+                {tx.returns.value.toLocaleString()} ({tx.returns.percent}%)
               </span>
             </div>
           ))}
         </div>
       </div>
+    </div>
+    <div className="flex flex-col gap-3">
+          <div className="h-100 w-86 bg-[#0e0d0d] rounded-xl">
+
+          </div>
+          <div className="h-65 w-86 bg-[#0e0d0d] rounded-xl p-4 flex flex-col">
+              <div className="flex justify-between items-center">
+                <h3 className="text-md text-[#747070]">Similar Stocks</h3>
+                <button className="text-sm underline text-blue-300">View more</button>
+              </div>
+          </div>
+    </div>
     </div>
   );
 };

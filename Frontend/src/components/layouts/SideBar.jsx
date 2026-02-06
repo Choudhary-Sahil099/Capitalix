@@ -34,9 +34,8 @@ const SideBar = () => {
   ];
 
   return (
-    <div className="min-h-screen w-59 flex flex-col gap-3 sticky top-0">
-  
-      <div className="flex flex-col gap-4 rounded-br-xl p-4 bg-[#0e0d0d]">
+    <div className="min-h-screen w-59 flex flex-col gap-11 sticky top-0">
+      <div className="flex flex-col gap- rounded-br-xl p-4 bg-[#0e0d0d]">
         <div className="flex justify-center items-center">
           <img src={Logo} alt="Logo" className="w-49 h-20" />
         </div>
@@ -73,7 +72,6 @@ const SideBar = () => {
           ))}
         </div>
       </div>
-      <div className="flex-1" />
 
       <div className="bg-[#0e0d0d] px-4 rounded-tr-xl rounded-br-xl">
         <div className="flex flex-col p-2">

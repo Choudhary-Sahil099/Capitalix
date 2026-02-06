@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import DashboardLayout from "./pages/Dashboard/DashboardLayout";
 import Watchlist from "./pages/Watchlist/Watchlist";
 import ProtectedRoute from "./components/layouts/ProtectedRoutes";
+import Transactions from "./pages/Transactions/Transactions";
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="watchlist" element={<Watchlist />} />
+        <Route path="transactions" element={<Transactions />} />
+
       </Route>
     </Routes>
   );
