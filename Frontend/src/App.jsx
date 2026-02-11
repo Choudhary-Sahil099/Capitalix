@@ -6,6 +6,7 @@ import Watchlist from "./pages/Watchlist/Watchlist";
 import ProtectedRoute from "./components/layouts/ProtectedRoutes";
 import Transactions from "./pages/Transactions/Transactions";
 import News from "./pages/News/News";
+import Explore from "./pages/Explore/Explore";
 
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
         <Route path="watchlist" element={<Watchlist />} />
         <Route path="transactions" element={<Transactions />} />
         <Route path="news" element={<News />} />
+        <Route path="explore" element={<Explore />} />
+
       </Route>
     </Routes>
   );
