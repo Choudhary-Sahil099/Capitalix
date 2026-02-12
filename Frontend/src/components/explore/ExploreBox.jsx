@@ -9,7 +9,7 @@ const ExploreBox = () => {
         {options.map((items) => (
             <button key={items} 
             onClick={() =>setCurrent(items)}
-            className={`flex items-center gap-2 px-3 py-1 text-xs rounded-lg transition-all
+            className={`flex items-center gap-2 px-3 py-1 text-md rounded-lg transition-all
                     ${
                       current === items
                         ? "bg-indigo-500 text-white"

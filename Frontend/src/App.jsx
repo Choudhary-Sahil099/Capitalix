@@ -7,6 +7,8 @@ import ProtectedRoute from "./components/layouts/ProtectedRoutes";
 import Transactions from "./pages/Transactions/Transactions";
 import News from "./pages/News/News";
 import Explore from "./pages/Explore/Explore";
+import Trade from "./pages/Trade/Trade";
+import Market from "./pages/Market/Market";
 
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
         <Route path="transactions" element={<Transactions />} />
         <Route path="news" element={<News />} />
         <Route path="explore" element={<Explore />} />
+        <Route path="trade" element={<Trade/>} />
+        <Route path="market" element={<Market />} />
 
       </Route>
     </Routes>
