@@ -19,6 +19,12 @@ const marketIndexes = [
     change: 215.8,
     percentage: 0.42,
   },
+  {
+    name: "BANKNIFTY",
+    price: 51240.2,
+    change: 215.8,
+    percentage: 0.42,
+  },
 ];
 
 const topGainers = [
@@ -88,11 +94,11 @@ const SectionCard = ({ title, data, type }) => {
 
 const marketSection= () => {
   return (
-    <div className="bg-black min-h-min overflow-hidden px-6 flex flex-col gap-4 ">
+    <div className="bg-black min-h-min overflow-hidden flex flex-col gap-4">
       <div className="flex flex-col gap-3">
         <h2 className="text-white text-2xl">Today's Market</h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {marketIndexes.map((item, index) => (
             <div
               key={index}
