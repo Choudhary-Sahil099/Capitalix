@@ -2,7 +2,7 @@ import Transaction from "../models/Transaction.js";
 
 export const addTransaction = async (req, res) => {
   try {
-    const { asset, type, quantity, price } = req.body;
+    const { asset, type, quantity, price,status } = req.body;
 
     const transaction = await Transaction.create({
       user: req.user._id,
@@ -10,6 +10,7 @@ export const addTransaction = async (req, res) => {
       type,
       quantity,
       price,
+      status,
     });
 
     res.status(201).json(transaction);
