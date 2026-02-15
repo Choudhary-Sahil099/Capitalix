@@ -2,52 +2,80 @@ import Watchlist from "../models/Watchlist.js";
 
 export const addToWatchlist = async (req, res) => {
   try {
-    const { asset } = req.body;
+    const { watchlistName, stock } = req.body;
 
-    const exists = await Watchlist.findOne({
+    let watchlist = await Watchlist.findOne({
       user: req.user._id,
-      asset,
+      name: watchlistName,
     });
 
-    if (exists) {
-      return res.status(400).json({ message: "Already in watchlist" });
+    if (!watchlist) {
+      watchlist = await Watchlist.create({
+        user: req.user._id,
+        name: watchlistName,
+        stocks: [stock],
+      });
+
+      return res.status(201).json(watchlist);
     }
 
-    const item = await Watchlist.create({
-      user: req.user._id,
-      asset,
-    });
+    const exists = watchlist.stocks.find(
+      (item) => item.asset === stock.asset
+    );
 
-    res.status(201).json(item);
+    if (exists) {
+      return res.status(400).json({ message: "Stock already exists" });
+    }
+
+    watchlist.stocks.push(stock);
+    await watchlist.save();
+
+    res.status(200).json(watchlist);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const getWatchlist = async (req, res) => {
   try {
-    const items = await Watchlist.find({
+    const watchlists = await Watchlist.find({
       user: req.user._id,
-    }).sort({ createdAt: -1 });
+    });
 
-    res.status(200).json(items);
+    const formatted = {};
+
+    watchlists.forEach((wl) => {
+      formatted[wl.name] = wl.stocks;
+    });
+
+    res.status(200).json(formatted);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+
 export const removeFromWatchlist = async (req, res) => {
   try {
-    const item = await Watchlist.findOneAndDelete({
-      _id: req.params.id,
+    const { watchlistName, asset } = req.params;
+
+    const watchlist = await Watchlist.findOne({
       user: req.user._id,
+      name: watchlistName,
     });
 
-    if (!item) {
-      return res.status(404).json({ message: "Not found" });
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    res.status(200).json({ message: "Removed successfully" });
+    watchlist.stocks = watchlist.stocks.filter(
+      (item) => item.asset !== asset
+    );
+
+    await watchlist.save();
+
+    res.status(200).json({ message: "Stock removed successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

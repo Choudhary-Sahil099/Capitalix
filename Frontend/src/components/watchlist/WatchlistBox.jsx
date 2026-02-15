@@ -1,104 +1,57 @@
-import React, { useState } from "react";
-import { Plus, Filter } from "lucide-react";
-import Nvidia from "../../assets/Nvidia.png";
+import React, { useState, useEffect } from "react";
+import Nvidia from "../../assets/nvidia.png";
 import Alphabet from "../../assets/Alphabet.webp";
-
-export const WATCHLIST_DATA = {
-  Watchlist1: [
-    {
-      id: 1,
-      asset: "AAPL",
-      assetName: "Apple Inc.",
-      quantity: 10,
-      marketPrice: 185.2,
-      invested: 1700,
-      current: 1852,
-      returns: {
-        value: 152,
-        percent: 8.94,
-      },
-    },
-    {
-      id: 2,
-      asset: "TSLA",
-      assetName: "Tesla Inc.",
-      quantity: 5,
-      marketPrice: 240.6,
-      invested: 1100,
-      current: 1203,
-      returns: {
-        value: 103,
-        percent: 9.36,
-      },
-    },
-    {
-      id: 3,
-      asset: "MSFT",
-      assetName: "Microsoft Corp.",
-      quantity: 6,
-      marketPrice: 378.4,
-      invested: 2100,
-      current: 2270.4,
-      returns: {
-        value: 170.4,
-        percent: 8.11,
-      },
-    },
-  ],
-
-  Watchlist2: [
-    {
-      id: 4,
-      asset: "BTC",
-      assetName: "Bitcoin",
-      quantity: 0.05,
-      marketPrice: 43250,
-      invested: 2000,
-      current: 2162.5,
-      returns: {
-        value: 162.5,
-        percent: 8.12,
-      },
-    },
-    {
-      id: 5,
-      asset: "ETH",
-      assetName: "Ethereum",
-      quantity: 0.8,
-      marketPrice: 2290,
-      invested: 1600,
-      current: 1832,
-      returns: {
-        value: 232,
-        percent: 14.5,
-      },
-    },
-    {
-      id: 6,
-      asset: "SOL",
-      assetName: "Solana",
-      quantity: 15,
-      marketPrice: 98.6,
-      invested: 1200,
-      current: 1479,
-      returns: {
-        value: -279,
-        percent: 23.25,
-      },
-    },
-  ],
-};
+import { Plus, Filter } from "lucide-react";
+import API from "../../api/axios";
 
 const WatchlistBox = () => {
   const [range, setRange] = useState("All Categories");
-  const [activeWatchlist, setActiveWatchlist] = useState("Watchlist1");
-  const currentWatchlist = WATCHLIST_DATA[activeWatchlist] || [];
+  const [activeWatchlist, setActiveWatchlist] = useState("");
+  const [watchlist, setWatchlist] = useState({});
   const [selectedStock, setSelectedStock] = useState(null);
-  const numbers = ["Watchlist1", "Watchlist2"];
+  const [loading, setLoading] = useState(true);
+
   const filters = [
     { label: "Add New", icon: Plus },
     { label: "Filter", icon: Filter },
   ];
+
+  useEffect(() => {
+    const fetchWatchlist = async () => {
+      try {
+        const { data } = await API.get("/watchlist");
+        console.log("DATA FROM BACKEND:", data); // to verify that the frontend recieves the data from the backend
+        setWatchlist(data);
+
+        const keys = Object.keys(data);
+
+        if (keys.length > 0) {
+          setActiveWatchlist(keys[0]);
+
+          if (data[keys[0]].length > 0) {
+            setSelectedStock(data[keys[0]][0]);
+          }
+        }
+      } catch (err) {
+        console.log("Error fetching the watchlists", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWatchlist();
+  }, []);
+
+  const currentWatchlist = watchlist[activeWatchlist] || [];
+  const numbers = Object.keys(watchlist);
+
+  if (loading) {
+    return (
+      <div className="text-white text-center py-20">
+        Loading watchlists...
+      </div>
+    );
+  }
 
   const similar = [
     {
@@ -123,25 +76,31 @@ const WatchlistBox = () => {
             {numbers.map((item) => (
               <button
                 key={item}
-                onClick={() => setActiveWatchlist(item)}
-                className={`text-sm px-4 py-2 rounded-lg transition
-        ${
-          activeWatchlist === item
-            ? "bg-indigo-500 text-white"
-            : "text-gray-400 hover:bg-[#222]"
-        }`}
+                onClick={() => {
+                  setActiveWatchlist(item);
+                  setSelectedStock(null);
+
+                  if (watchlist[item]?.length > 0) {
+                    setSelectedStock(watchlist[item][0]);
+                  }
+                }}
+                className={`text-sm px-4 py-2 rounded-lg transition ${
+                  activeWatchlist === item
+                    ? "bg-indigo-500 text-white"
+                    : "text-gray-400 hover:bg-[#222]"
+                }`}
               >
                 {item}
               </button>
             ))}
           </div>
+
           <div className="flex gap-2 bg-[#141414] p-1 rounded-xl">
             {filters.map(({ label, icon: Icon }) => (
               <button
                 key={label}
                 onClick={() => setRange(label)}
-                className={`flex items-center gap-2 px-3 py-1 text-xs rounded-lg transition-all
-                ${
+                className={`flex items-center gap-2 px-3 py-1 text-xs rounded-lg transition-all ${
                   range === label
                     ? "bg-indigo-500 text-white"
                     : "text-[#a8a8a8] hover:bg-[#222]"
@@ -153,55 +112,70 @@ const WatchlistBox = () => {
             ))}
           </div>
         </div>
-        <div
-          className="grid grid-cols-[2.5fr_1.5fr_1fr_0.8fr_1fr_1fr]
-             h-8 items-center
-             text-xs text-gray-400 px-2
-             border-b border-white/5"
-        >
+        <div className="grid grid-cols-[2.5fr_1.5fr_1fr_0.8fr_1fr_1fr] h-8 items-center text-xs text-gray-400 px-2 border-b border-white/5">
           <span>Asset</span>
           <span>Quantity</span>
-          <span>Mkt. Prize</span>
+          <span>Mkt. Price</span>
           <span>Invested</span>
           <span>Current</span>
           <span>Return</span>
         </div>
         <div className="flex-1 overflow-y-auto mt-3 pr-2 hide-scrollbar">
           <div className="flex flex-col gap-3">
-            {currentWatchlist.map((items) => (
-              <div
-                key={items.id}
-                onClick={() => setSelectedStock(items)}
-                className="grid grid-cols-[2.5fr_1.5fr_1fr_0.8fr_1fr_1fr] items-center bg-[#141414] px-4 py-3 rounded-lg hover:bg-[#1a1a1a] transition"
-              >
-                <div className="flex flex-col">
-                  <span className="text-white font-medium truncate">
-                    {items.asset}
-                    <span className="text-gray-400 text-sm ml-1">
-                      ({items.assetName})
+            {currentWatchlist.length === 0 ? (
+              <div className="text-gray-500 text-center py-10">
+                No stocks in this watchlist
+              </div>
+            ) : (
+              currentWatchlist.map((items) => (
+                <div
+                  key={items._id}
+                  onClick={() => setSelectedStock(items)}
+                  className={`grid grid-cols-[2.5fr_1.5fr_1fr_0.8fr_1fr_1fr] items-center px-4 py-3 rounded-lg transition cursor-pointer ${
+                    selectedStock?._id === items._id
+                      ? "bg-indigo-500/20"
+                      : "bg-[#141414] hover:bg-[#1a1a1a]"
+                  }`}
+                >
+                  <div className="flex flex-col">
+                    <span className="text-white font-medium truncate">
+                      {items.asset}
+                      <span className="text-gray-400 text-sm ml-1">
+                        ({items.assetName})
+                      </span>
                     </span>
+                  </div>
+
+                  <span className="text-sm text-gray-300">
+                    {items.quantity ?? 0}
+                  </span>
+
+                  <span className="text-sm text-gray-300">
+                    ${items.marketPrice?.toLocaleString() || 0}
+                  </span>
+
+                  <span className="text-sm text-gray-300">
+                    ${items.invested?.toLocaleString() || 0}
+                  </span>
+
+                  <span className="text-sm text-white font-medium">
+                    ${items.current?.toLocaleString() || 0}
+                  </span>
+
+                  <span
+                    className={`text-sm font-semibold ${
+                      items.returns?.value >= 0
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {items.returns?.value >= 0 ? "+" : ""}
+                    {items.returns?.value?.toLocaleString() || 0} (
+                    {items.returns?.percent ?? 0}%)
                   </span>
                 </div>
-                <span className="text-sm text-gray-300">{items.quantity}</span>
-                <span className="text-sm text-gray-300">
-                  ${items.marketPrice.toLocaleString()}
-                </span>
-                <span className="text-sm text-gray-300">
-                  ${items.invested.toLocaleString()}
-                </span>
-                <span className="text-sm text-white font-medium">
-                  ${items.current.toLocaleString()}
-                </span>
-                <span
-                  className={`text-sm font-semibold
-                  ${items.returns.value >= 0 ? "text-green-500" : "text-red-500"}`}
-                >
-                  {items.returns.value >= 0 ? "+" : ""}
-                  {items.returns.value.toLocaleString()} (
-                  {items.returns.percent}%)
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -220,18 +194,18 @@ const WatchlistBox = () => {
 
               <div className="mt-4">
                 <p className="text-3xl font-bold text-white">
-                  ${selectedStock.current.toLocaleString()}
+                  ${selectedStock.current?.toLocaleString() || 0}
                 </p>
                 <p
                   className={`text-sm mt-1 ${
-                    selectedStock.returns.value >= 0
+                    selectedStock.returns?.value >= 0
                       ? "text-green-400"
                       : "text-red-400"
                   }`}
                 >
-                  {selectedStock.returns.value >= 0 ? "+" : ""}
-                  {selectedStock.returns.value} ({selectedStock.returns.percent}
-                  %)
+                  {selectedStock.returns?.value >= 0 ? "+" : ""}
+                  {selectedStock.returns?.value ?? 0} (
+                  {selectedStock.returns?.percent ?? 0}%)
                 </p>
               </div>
 
@@ -239,24 +213,25 @@ const WatchlistBox = () => {
                 <div>
                   <p className="text-gray-400">Quantity</p>
                   <p className="text-white font-medium">
-                    {selectedStock.quantity}
+                    {selectedStock.quantity ?? 0}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-gray-400">Invested</p>
                   <p className="text-white font-medium">
-                    ${selectedStock.invested.toLocaleString()}
+                    ${selectedStock.invested?.toLocaleString() || 0}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-gray-400">Market Price</p>
                   <p className="text-white font-medium">
-                    ${selectedStock.marketPrice}
+                    ${selectedStock.marketPrice?.toLocaleString() || 0}
                   </p>
                 </div>
               </div>
+
               <div className="flex gap-3 mt-8">
                 <button
                   onClick={() => console.log("BUY", selectedStock)}
@@ -287,6 +262,7 @@ const WatchlistBox = () => {
               View more
             </button>
           </div>
+
           <div className="mt-4 flex flex-col gap-4">
             {similar.map((stock, index) => (
               <div

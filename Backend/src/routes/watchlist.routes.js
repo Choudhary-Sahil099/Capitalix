@@ -9,7 +9,9 @@ import {
 const router = express.Router();
 
 router.post("/", authMiddleware, addToWatchlist);
+
 router.get("/", authMiddleware, getWatchlist);
-router.delete("/:id", authMiddleware, removeFromWatchlist);
+
+router.delete("/:watchlistName/:asset", authMiddleware, removeFromWatchlist);
 
 export default router;
