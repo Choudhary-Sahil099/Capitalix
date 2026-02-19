@@ -47,11 +47,11 @@ export const getTopMovers = async () => {
 
   const gainers = [...formatted]
     .sort((a, b) => b.percent - a.percent)
-    .slice(0, 3);
+    .slice(0, 4);
 
   const losers = [...formatted]
     .sort((a, b) => a.percent - b.percent)
-    .slice(0, 3);
+    .slice(0, 4);
 
   return { gainers, losers };
 };
