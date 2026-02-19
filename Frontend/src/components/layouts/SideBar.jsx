@@ -19,7 +19,7 @@ const SideBar = () => {
   const menuItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { label: "Market", icon: LineChart, path: "/dashboard/market" },
-    { label: "Trade", icon: ArrowLeftRight, path: "/dashboard/trade" },
+    { label: "Position", icon: ArrowLeftRight, path: "/dashboard/trade" },
     { label: "Transactions", icon: Receipt, path: "/dashboard/transactions" },
     { label: "News", icon: Newspaper, path: "/dashboard/news" },
     { label: "Explore", icon: Compass, path: "/dashboard/explore" },

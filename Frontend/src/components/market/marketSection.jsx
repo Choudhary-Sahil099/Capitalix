@@ -99,9 +99,9 @@ const MarketSection = () => {
   }, []);
 
   return (
-    <div className="bg-black min-h-screen py-6 flex flex-col gap-4">
+    <div className="bg-black min-h-screen py-2 flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-white text-3xl font-semibold">
+        <h2 className="text-white text-2xl font-semibold">
           Market Overview
         </h2>
         {lastUpdated && (

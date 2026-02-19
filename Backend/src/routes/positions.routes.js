@@ -1,9 +1,9 @@
 import express from "express";
+import { getPositions } from "../controllers/position.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import { getPortfolioSummary } from "../controllers/portfolio.controller.js";
 
 const router = express.Router();
 
-router.get("/summary", authMiddleware, getPortfolioSummary);
+router.get("/", authMiddleware, getPositions);
 
 export default router;
