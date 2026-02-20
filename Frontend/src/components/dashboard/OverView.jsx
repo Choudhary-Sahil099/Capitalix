@@ -1,12 +1,21 @@
 import React from "react";
 import { BringToFront } from "lucide-react";
 
-const OverView = () => {
+const OverView = ({ overview }) => {
   const data = [
     { name: "Account", value: "55AWAS5" },
-    { name: "Invested", value: "₹6,30,567" },
-    { name: "P&L", value: "₹1,20,302" },
-    { name: "Available Funds", value: "₹11,20,302" },
+    {
+      name: "Invested",
+      value: `₹${overview?.invested?.toFixed(2) || 0}`,
+    },
+    {
+      name: "P&L",
+      value: `₹${overview?.pnl?.toFixed(2) || 0}`,
+    },
+    {
+      name: "Available Funds",
+      value: `₹${overview?.availableBalance?.toFixed(2) || 0}`,
+    },
   ];
 
   return (

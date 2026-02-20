@@ -10,8 +10,7 @@ export const getPositions = async (req, res) => {
 
     const transactions = await Transaction.find({
       user: userId,
-      status: "Completed",
-    });
+    }).sort({ createdAt: 1 });
 
     const holdingsMap = {};
 
@@ -33,7 +32,15 @@ export const getPositions = async (req, res) => {
       }
 
       if (t.type === "sell") {
-        holdingsMap[t.asset].quantity -= t.quantity;
+        const currentQty = holdingsMap[t.asset].quantity;
+
+        if (currentQty > 0) {
+          const avgPrice = holdingsMap[t.asset].totalInvested / currentQty;
+
+          holdingsMap[t.asset].totalInvested -= avgPrice * t.quantity;
+          holdingsMap[t.asset].quantity -= t.quantity;
+        }
+
         totalSellAmount += t.quantity * t.price;
       }
     });
@@ -48,10 +55,7 @@ export const getPositions = async (req, res) => {
       try {
         const quote = await yahooFinance.quote(asset + ".NS");
 
-        if (!quote || !quote.regularMarketPrice) {
-          console.log("Invalid symbol:", asset);
-          continue;
-        }
+        if (!quote?.regularMarketPrice) continue;
 
         const avgPrice = data.totalInvested / data.quantity;
         const currentPrice = quote.regularMarketPrice;
@@ -70,8 +74,7 @@ export const getPositions = async (req, res) => {
           pnl,
           percent,
         });
-      } catch (err) {
-        console.log("Yahoo error for:", asset);
+      } catch {
         continue;
       }
     }
