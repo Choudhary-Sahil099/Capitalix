@@ -6,11 +6,11 @@ const OverView = ({ overview }) => {
     { name: "Account", value: "55AWAS5" },
     {
       name: "Invested",
-      value: `₹${overview?.invested?.toFixed(2) || 0}`,
+      value: `₹${overview?.totalInvested?.toFixed(2) || 0}`,
     },
     {
       name: "P&L",
-      value: `₹${overview?.pnl?.toFixed(2) || 0}`,
+      value: `₹${overview?.totalPnL?.toFixed(2) || 0}`,
     },
     {
       name: "Available Funds",

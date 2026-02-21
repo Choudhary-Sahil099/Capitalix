@@ -12,6 +12,6 @@ router.post("/", authMiddleware, addToWatchlist);
 
 router.get("/", authMiddleware, getWatchlist);
 
-router.delete("/:watchlistName/:asset", authMiddleware, removeFromWatchlist);
+router.delete("/:asset", authMiddleware, removeFromWatchlist);
 
 export default router;
