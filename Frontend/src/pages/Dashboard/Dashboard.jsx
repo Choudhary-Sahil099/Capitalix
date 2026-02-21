@@ -28,7 +28,6 @@ const Dashboard = () => {
       setWatchlist(res.data.watchlist);
 
       console.log("Dashboard:", res.data);
-
     } catch (error) {
       console.error("Dashboard fetch error:", error);
     }
@@ -43,6 +42,7 @@ const Dashboard = () => {
           <UserGraph
             positions={positions}
             balance={overview.availableBalance || 0}
+            transactions={transactions}
           />
 
           <div className="flex gap-4">

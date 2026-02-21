@@ -43,7 +43,6 @@ export const buyStock = async (req, res) => {
       message: "Stock purchased successfully",
       balance: user.balance,
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -92,18 +91,18 @@ export const sellStock = async (req, res) => {
 
     await Transaction.create({
       user: userId,
-      symbol,
-      type: "SELL",
-      quantity: qty,
+      asset: symbol,
+      name: quote.longName || quote.shortName,
+      type: "buy",
+      quantity,
       price: stockPrice,
-      total: totalReturn,
+      total,
     });
 
     res.status(200).json({
       message: "Stock sold successfully",
       balance: user.balance,
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

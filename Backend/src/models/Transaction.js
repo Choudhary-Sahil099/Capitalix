@@ -7,7 +7,12 @@ const transactionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     asset: {
+      type: String,
+      required: true,
+    },
+    name: {
       type: String,
       required: true,
     },
@@ -24,13 +29,13 @@ const transactionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    status:{
-      type:String,
+    status: {
+      type: String,
       enum: ["Completed", "Pending", "Cancelled"],
-      required:true
+      required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Transaction", transactionSchema);

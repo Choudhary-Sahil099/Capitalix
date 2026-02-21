@@ -9,21 +9,22 @@ const TransactionHistory = ({ transactions }) => {
         <table className="w-full table-fixed text-sm">
           <thead className="block text-gray-400">
             <tr className="table w-full table-fixed">
-              <th className="text-left">Stock</th>
+              <th className="text-left">Name</th>
+              <th className="text-left">Symbol</th>
               <th className="text-left">Type</th>
               <th className="text-right">Rate</th>
             </tr>
           </thead>
 
-          <tbody className="block h-32 overflow-y-auto">
+          <tbody className="block h-32 overflow-y-auto hide-scrollbar pt-1">
             {transactions && transactions.length > 0 ? (
               transactions.map((tx) => (
                 <tr
                   key={tx._id}
                   className="table w-full table-fixed border-b border-gray-800 hover:bg-[#1a1a1a]"
                 >
-                  <td className="py-2">{tx.asset}</td>
-
+                  <td className="py-2">{tx.name}</td>
+                  <td className="text-gray-400">{tx.asset}</td>
                   <td>
                     <span
                       className={`text-xs px-2 py-1 rounded-full ${
@@ -43,7 +44,7 @@ const TransactionHistory = ({ transactions }) => {
               ))
             ) : (
               <tr className="table w-full">
-                <td className="py-4 text-center text-gray-500" colSpan="3">
+                <td className="py-4 text-center text-gray-500" colSpan="4">
                   No transactions yet
                 </td>
               </tr>
