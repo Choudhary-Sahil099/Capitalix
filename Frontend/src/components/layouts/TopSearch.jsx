@@ -6,8 +6,21 @@ import { useNavigate } from "react-router-dom";
 const TopSearch = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [user, setUser] = useState("User1");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await API.get("/auth/me");
+        setUser(res.data);
+      } catch (err) {
+        console.error("User fetch failed", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
   useEffect(() => {
     const fetchStocks = async () => {
       if (!query.trim()) {
@@ -29,7 +42,6 @@ const TopSearch = () => {
 
   return (
     <div className="relative w-full h-20 rounded-bl-xl rounded-br-xl bg-[#0e0d0d] flex justify-between items-center p-6">
-      
       <div className="relative w-96">
         <input
           value={query}
@@ -51,21 +63,18 @@ const TopSearch = () => {
                 className="p-3 hover:bg-[#2a2a2a] cursor-pointer text-white"
               >
                 <div className="font-semibold">{stock.symbol}</div>
-                <div className="text-sm text-gray-400">
-                  {stock.name}
-                </div>
+                <div className="text-sm text-gray-400">{stock.name}</div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-
       <div className="flex gap-6 justify-center items-center text-white">
         <Bell size={30} />
         <div className="flex justify-center items-center gap-2">
           <CircleUser size={30} />
-          <span className="text-md text-[#6b6a6a]">Sahil</span>
+          <span className="text-md text-[#6b6a6a]">{user ? user.name : "Loading..."}</span>
         </div>
         <Sun size={30} />
       </div>

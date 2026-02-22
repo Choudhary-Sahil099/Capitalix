@@ -52,3 +52,11 @@ export const login = async(req, res) =>{
     });
 
 };
+// to get the name of the user for the topSearch bar in the website
+export const getMe = async (req, res) => {
+  res.json({
+    name: req.user.name,
+    email: req.user.email,
+    _id: req.user._id,
+  });
+};
