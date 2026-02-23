@@ -87,24 +87,19 @@ export const removeFromWatchlist = async (req, res) => {
   try {
     const { asset } = req.params;
 
-    const watchlist = await Watchlist.findOne({
-      user: req.user._id,
-    });
-
-    if (!watchlist) {
-      return res.status(404).json({
-        message: "Watchlist not found",
-      });
-    }
-
-    watchlist.stocks = watchlist.stocks.filter(
-      (item) => item.asset !== asset
+    const updated = await Watchlist.findOneAndUpdate(
+      { user: req.user._id },
+      { $pull: { stocks: { asset } } },
+      { new: true }
     );
 
-    await watchlist.save();
+    if (!updated) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
 
     res.status(200).json({
       message: "Stock removed successfully",
+      stocks: updated.stocks,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

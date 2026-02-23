@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Nvidia from "../../assets/nvidia.png";
 import Alphabet from "../../assets/Alphabet.webp";
+import { Trash2 } from "lucide-react";
 import API from "../../api/axios";
 
+// adding the feature of the remove the watchlist form the watchlist section
 const WatchlistBox = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [selectedStock, setSelectedStock] = useState(null);
@@ -26,12 +28,26 @@ const WatchlistBox = () => {
 
     fetchWatchlist();
   }, []);
+  const handleRemove = async (asset, e) => {
+  e.stopPropagation();
+
+  try {
+    const { data } = await API.delete(`/watchlist/${asset}`);
+    setWatchlist(data.stocks || []);
+    if (data.stocks?.length > 0) {
+      setSelectedStock(data.stocks[0]);
+    } else {
+      setSelectedStock(null);
+    }
+
+  } catch (err) {
+    console.log("Error removing stock", err);
+  }
+};
 
   if (loading) {
     return (
-      <div className="text-white text-center py-20">
-        Loading watchlist...
-      </div>
+      <div className="text-white text-center py-20">Loading watchlist...</div>
     );
   }
 
@@ -53,10 +69,8 @@ const WatchlistBox = () => {
   return (
     <div className="flex gap-4">
       <div className="w-230 h-168 rounded-xl bg-[#0e0d0d] flex flex-col p-6">
-        <h2 className="text-xl text-white font-semibold mb-6">
-          My Watchlist
-        </h2>
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] text-xs text-gray-400 px-4 pb-2 border-b border-white/5">
+        <h2 className="text-xl text-white font-semibold mb-6">My Watchlist</h2>
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_0.2fr] text-xs text-gray-400 px-4 pb-2 border-b border-white/5">
           <span>Asset</span>
           <span>Price</span>
           <span>Change</span>
@@ -72,19 +86,15 @@ const WatchlistBox = () => {
               <div
                 key={item.asset}
                 onClick={() => setSelectedStock(item)}
-                className={`grid grid-cols-[2fr_1fr_1fr_1fr] items-center px-4 py-3 border-b border-white/5 cursor-pointer transition ${
+                className={`grid grid-cols-[2fr_1fr_1fr_1fr_0.1fr] items-center px-4 py-3 border-b border-white/5 cursor-pointer transition ${
                   selectedStock?.asset === item.asset
                     ? "bg-indigo-500/10"
                     : "hover:bg-[#141414]"
                 }`}
               >
                 <div>
-                  <p className="text-white font-medium">
-                    {item.asset}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {item.assetName}
-                  </p>
+                  <p className="text-white font-medium">{item.asset}</p>
+                  <p className="text-xs text-gray-400">{item.assetName}</p>
                 </div>
 
                 <span className="text-gray-300 text-sm">
@@ -93,9 +103,7 @@ const WatchlistBox = () => {
 
                 <span
                   className={`text-sm font-medium ${
-                    item.dayChange >= 0
-                      ? "text-green-400"
-                      : "text-red-400"
+                    item.dayChange >= 0 ? "text-green-400" : "text-red-400"
                   }`}
                 >
                   {item.dayChange >= 0 ? "+" : ""}
@@ -104,14 +112,18 @@ const WatchlistBox = () => {
 
                 <span
                   className={`text-sm font-medium ${
-                    item.dayPercent >= 0
-                      ? "text-green-400"
-                      : "text-red-400"
+                    item.dayPercent >= 0 ? "text-green-400" : "text-red-400"
                   }`}
                 >
                   {item.dayPercent >= 0 ? "+" : ""}
                   {item.dayPercent?.toFixed(2)}%
                 </span>
+                <button
+                  onClick={(e) => handleRemove(item.asset, e)}
+                  className="border border-[#626262] p-1 rounded hover:bg-red-500/20 hover:border-red-500 transition"
+                >
+                  <Trash2 size={16} className="text-red-400" />
+                </button>
               </div>
             ))
           )}
@@ -125,9 +137,7 @@ const WatchlistBox = () => {
               <h2 className="text-lg font-semibold text-white">
                 {selectedStock.asset}
               </h2>
-              <p className="text-sm text-gray-400">
-                {selectedStock.assetName}
-              </p>
+              <p className="text-sm text-gray-400">{selectedStock.assetName}</p>
 
               <div className="mt-6">
                 <p className="text-3xl font-bold text-white">
@@ -155,9 +165,7 @@ const WatchlistBox = () => {
 
         <div className="h-[240px] w-[350px] bg-[#0e0d0d] rounded-xl p-4 flex flex-col">
           <div className="flex justify-between items-center">
-            <h3 className="text-md text-[#747070]">
-              Similar Stocks
-            </h3>
+            <h3 className="text-md text-[#747070]">Similar Stocks</h3>
             <button className="text-sm underline text-blue-300">
               View more
             </button>
@@ -180,9 +188,7 @@ const WatchlistBox = () => {
 
                 <div
                   className={`text-sm font-semibold ${
-                    stock.returns.value >= 0
-                      ? "text-green-400"
-                      : "text-red-400"
+                    stock.returns.value >= 0 ? "text-green-400" : "text-red-400"
                   }`}
                 >
                   {stock.returns.value >= 0 ? "+" : ""}

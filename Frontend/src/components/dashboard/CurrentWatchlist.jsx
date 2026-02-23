@@ -6,7 +6,7 @@ const CurrentWatchlist = ({ watchlist = [] }) => {
     _id: s.asset,
     stock: s.assetName,
     symbol: s.asset,
-    rate: s.currentPrice || 0,
+    rate: s.dayChange || 0, // changing the price of the stock to the required format
     change: s.dayPercent || 0,
   }));
 
