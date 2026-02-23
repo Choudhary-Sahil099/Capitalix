@@ -97,10 +97,40 @@ export const removeFromWatchlist = async (req, res) => {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    res.status(200).json({
-      message: "Stock removed successfully",
-      stocks: updated.stocks,
-    });
+    if (updated.stocks.length === 0) {
+      return res.json([]);
+    }
+
+    const enrichedStocks = await Promise.all(
+      updated.stocks.map(async (stock) => {
+        try {
+          const quote = await yahooFinance.quote(
+            stock.asset + ".NS"
+          );
+
+          return {
+            asset: stock.asset,
+            assetName: stock.assetName,
+            currentPrice: quote.regularMarketPrice || 0,
+            dayChange:
+              quote.regularMarketChange || 0,
+            dayPercent:
+              quote.regularMarketChangePercent || 0,
+          };
+        } catch {
+          return {
+            asset: stock.asset,
+            assetName: stock.assetName,
+            currentPrice: 0,
+            dayChange: 0,
+            dayPercent: 0,
+          };
+        }
+      })
+    );
+
+    res.status(200).json(enrichedStocks);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

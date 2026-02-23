@@ -11,33 +11,47 @@ const WatchlistBox = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchWatchlist = async () => {
-      try {
-        const { data } = await API.get("/watchlist");
-        setWatchlist(data || []);
+  const fetchWatchlist = async () => {
+    try {
+      const { data } = await API.get("/watchlist");
+      setWatchlist(data || []);
 
-        if (data?.length > 0) {
-          setSelectedStock(data[0]);
-        }
-      } catch (err) {
-        console.log("Error fetching watchlist", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setSelectedStock((prev) => {
+        if (!prev) return data?.[0] || null;
 
+        const updated = data?.find((s) => s.asset === prev.asset);
+        return updated || data?.[0] || null;
+      });
+
+    } catch (err) {
+      console.log("Error fetching watchlist", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchWatchlist();
+
+  const interval = setInterval(() => {
     fetchWatchlist();
-  }, []);
+  }, 10000); // refresh every 10 sec
+
+  return () => clearInterval(interval);
+
+}, []);
   const handleRemove = async (asset, e) => {
   e.stopPropagation();
 
   try {
-    const { data } = await API.delete(`/watchlist/${asset}`);
-    setWatchlist(data.stocks || []);
-    if (data.stocks?.length > 0) {
-      setSelectedStock(data.stocks[0]);
-    } else {
-      setSelectedStock(null);
+    await API.delete(`/watchlist/${asset}`);
+    const { data } = await API.get("/watchlist");
+console.log("WATCHLIST RESPONSE:", data);
+    const updatedStocks = data || [];
+
+    setWatchlist(updatedStocks);
+
+    if (selectedStock?.asset === asset) {
+      setSelectedStock(updatedStocks[0] || null);
     }
 
   } catch (err) {
@@ -76,7 +90,7 @@ const WatchlistBox = () => {
           <span>Change</span>
           <span>%</span>
         </div>
-        <div className="flex-1 overflow-y-auto mt-3 pr-2">
+        <div className="flex-1 overflow-y-auto mt-3 pr-2 hide-scrollbar">
           {watchlist.length === 0 ? (
             <div className="text-gray-500 text-center py-10">
               No stocks in watchlist
