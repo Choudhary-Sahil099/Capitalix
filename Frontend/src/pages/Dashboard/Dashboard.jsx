@@ -26,8 +26,6 @@ const Dashboard = () => {
       setOverview(res.data.overview);
       setTransactions(res.data.transactions);
       setWatchlist(res.data.watchlist);
-
-      console.log("Dashboard:", res.data);
     } catch (error) {
       console.error("Dashboard fetch error:", error);
     }

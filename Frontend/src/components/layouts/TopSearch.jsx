@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 const TopSearch = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [user, setUser] = useState("User1");
-  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -21,6 +21,7 @@ const TopSearch = () => {
 
     fetchUser();
   }, []);
+
   useEffect(() => {
     const fetchStocks = async () => {
       if (!query.trim()) {
@@ -32,7 +33,7 @@ const TopSearch = () => {
         const res = await API.get(`/market/search?q=${query}`);
         setResults(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Search failed:", err);
       }
     };
 
@@ -42,28 +43,32 @@ const TopSearch = () => {
 
   return (
     <div className="relative w-full h-20 rounded-bl-xl rounded-br-xl bg-[#0e0d0d] flex justify-between items-center p-6">
+      
       <div className="relative w-96">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="bg-black w-full h-12 rounded-md text-white p-4"
+          className="bg-black w-full h-12 rounded-md text-white p-4 outline-none"
           placeholder="Search stocks..."
         />
 
         {results.length > 0 && (
-          <div className="absolute top-14 w-full bg-[#1a1a1a] border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50 hide-scrollbar">
+          <div className="absolute top-14 w-full bg-[#1a1a1a] border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
             {results.map((stock) => (
               <div
                 key={stock.symbol}
                 onClick={() => {
-                  navigate(`/stock/${stock.symbol}`);
+                  navigate(`/dashboard/stock/${stock.symbol}`);
+
                   setQuery("");
                   setResults([]);
                 }}
-                className="p-3 hover:bg-[#2a2a2a] cursor-pointer text-white"
+                className="p-3 hover:bg-[#2a2a2a] cursor-pointer text-white transition"
               >
                 <div className="font-semibold">{stock.symbol}</div>
-                <div className="text-sm text-gray-400">{stock.name}</div>
+                <div className="text-sm text-gray-400">
+                  {stock.name}
+                </div>
               </div>
             ))}
           </div>
@@ -71,12 +76,16 @@ const TopSearch = () => {
       </div>
 
       <div className="flex gap-6 justify-center items-center text-white">
-        <Bell size={30} />
+        <Bell size={28} />
+
         <div className="flex justify-center items-center gap-2">
-          <CircleUser size={30} />
-          <span className="text-md text-[#6b6a6a]">{user ? user.name : "Loading..."}</span>
+          <CircleUser size={28} />
+          <span className="text-md text-[#6b6a6a]">
+            {user ? user.name : "Loading..."}
+          </span>
         </div>
-        <Sun size={30} />
+
+        <Sun size={28} />
       </div>
     </div>
   );

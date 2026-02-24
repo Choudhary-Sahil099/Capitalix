@@ -94,7 +94,7 @@ const MarketSection = () => {
     };
 
     fetchMarketData();
-    const interval = setInterval(fetchMarketData, 60000);
+    const interval = setInterval(fetchMarketData, 10000); // fetching the market after every 30sec to make it ideal 
     return () => clearInterval(interval);
   }, []);
 

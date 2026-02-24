@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
 import yahooFinance from "yahoo-finance2";
 
+
 const getStockPrice = async (symbol) => {
   const quote = await yahooFinance.quote(symbol);
   return quote.regularMarketPrice;
@@ -25,11 +26,10 @@ export const buyStock = async (req, res) => {
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
-    // Deduct balance
+
     user.balance -= totalCost;
     await user.save();
 
-    // Create transaction
     await Transaction.create({
       user: userId,
       symbol,
@@ -81,8 +81,9 @@ export const sellStock = async (req, res) => {
     }
 
     const stockPrice = await getStockPrice(symbol);
-    if (!stockPrice)
+    if (!stockPrice) {
       return res.status(400).json({ message: "Invalid stock symbol" });
+    }
 
     const totalReturn = stockPrice * qty;
 
@@ -91,18 +92,18 @@ export const sellStock = async (req, res) => {
 
     await Transaction.create({
       user: userId,
-      asset: symbol,
-      name: quote.longName || quote.shortName,
-      type: "buy",
-      quantity,
+      symbol,
+      type: "SELL",
+      quantity: qty,
       price: stockPrice,
-      total,
+      total: totalReturn,
     });
 
     res.status(200).json({
       message: "Stock sold successfully",
       balance: user.balance,
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
