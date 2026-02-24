@@ -39,17 +39,17 @@ export const searchStocks = (req, res) => {
 
       let score = 0;
 
-      if (symbol === query) score = 4;               
+      if (symbol === query) score = 4;
       else if (symbol.startsWith(query)) score = 3;
       else if (name.startsWith(query)) score = 2;
       else if (symbol.includes(query) || name.includes(query)) score = 1;
 
       return { ...stock, score };
     })
-    .filter(stock => stock.score > 0)
+    .filter((stock) => stock.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 20)
-    .map(({ score, ...rest }) => rest); 
+    .map(({ score, ...rest }) => rest);
 
   res.json(ranked);
 };
@@ -79,68 +79,82 @@ export const getStockQuote = async (req, res) => {
 export const getStockChart = async (req, res) => {
   try {
     let { symbol } = req.params;
-    const { range } = req.query;
+    let { range } = req.query;
 
     if (!symbol.includes(".")) {
       symbol = `${symbol}.NS`;
     }
 
     const now = new Date();
-    let period1;
-    let interval;
+    let startDate = new Date();
+    let interval = "1d";
 
     switch (range) {
       case "1d":
-        period1 = new Date(now - 1 * 24 * 60 * 60 * 1000);
+        startDate.setDate(now.getDate() - 1);
         interval = "5m";
         break;
 
       case "1w":
-        period1 = new Date(now - 7 * 24 * 60 * 60 * 1000);
-        interval = "30m";
+        startDate.setDate(now.getDate() - 7);
+        interval = "15m";
         break;
 
       case "1m":
-        period1 = new Date(now - 30 * 24 * 60 * 60 * 1000);
-        interval = "1d";
+        startDate.setMonth(now.getMonth() - 1);
+        interval = "1h";
         break;
 
       case "6m":
-        period1 = new Date(now - 180 * 24 * 60 * 60 * 1000);
+        startDate.setMonth(now.getMonth() - 6);
         interval = "1d";
         break;
 
       case "1y":
       default:
-        period1 = new Date(now - 365 * 24 * 60 * 60 * 1000);
+        startDate.setFullYear(now.getFullYear() - 1);
         interval = "1d";
         break;
     }
 
-    console.log("Range:", range);
-    console.log("Period1:", period1);
-    console.log("Interval:", interval);
-
     const result = await yahooFinance.chart(symbol, {
-      period1: Math.floor(period1.getTime() / 1000),
+      period1: Math.floor(startDate.getTime() / 1000),
       period2: Math.floor(now.getTime() / 1000),
       interval,
     });
 
-    if (!result?.quotes?.length) {
+    if (!result || !result.quotes || result.quotes.length === 0) {
       return res.status(404).json({ message: "No chart data found" });
     }
+    const uniqueMap = new Map();
 
-    const chartData = result.quotes.map((item) => ({
-      date: item.date,
-      close: item.close,
-      volume: item.volume,
-    }));
+    result.quotes.forEach((item) => {
+      if (
+        item.date &&
+        item.open !== null &&
+        item.high !== null &&
+        item.low !== null &&
+        item.close !== null
+      ) {
+        uniqueMap.set(item.date, {
+          date: item.date,
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+          volume: item.volume,
+        });
+      }
+    });
+
+    const chartData = Array.from(uniqueMap.values()).sort(
+      (a, b) => a.date - b.date
+    );
 
     res.json(chartData);
 
   } catch (error) {
-    console.error("BACKEND CHART ERROR:", error);
+    console.error("🔥 BACKEND CHART ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
