@@ -1,13 +1,11 @@
 import Transaction from "../models/Transaction.js";
 import Watchlist from "../models/Watchlist.js";
+import Wallet from "../models/Wallet.js";
 import YahooFinance from "yahoo-finance2";
 
 const yahooFinance = new YahooFinance({
   suppressNotices: ["yahooSurvey"],
 });
-
-const INITIAL_BALANCE = 1000000;
-
 
 const priceCache = {};
 
@@ -35,13 +33,22 @@ export const getDashboard = async (req, res) => {
   try {
     const userId = req.user.id;
 
+    let wallet = await Wallet.findOne({ user: userId });
+
+    if (!wallet) {
+      wallet = await Wallet.create({
+        user: userId,
+        balance: 1000000,
+      });
+    }
+
+    const balance = wallet.balance;
+
     const transactions = await Transaction.find({
       user: userId,
     }).sort({ createdAt: 1 });
 
     const holdingsMap = {};
-    let balance = INITIAL_BALANCE;
-
 
     transactions.forEach((t) => {
       const asset = t.asset;
@@ -57,7 +64,6 @@ export const getDashboard = async (req, res) => {
       if (t.type === "buy") {
         holdingsMap[asset].quantity += t.quantity;
         holdingsMap[asset].totalInvested += amount;
-        balance -= amount;
       }
 
       if (t.type === "sell") {
@@ -72,71 +78,66 @@ export const getDashboard = async (req, res) => {
 
           holdingsMap[asset].quantity -= t.quantity;
         }
-
-        balance += amount;
       }
     });
 
-    const positionPromises = Object.keys(holdingsMap).map(
-      async (asset) => {
-        const data = holdingsMap[asset];
-
-        if (data.quantity <= 0) return null;
-
-        try {
-          const quote = await getCachedQuote(asset);
-
-          const currentPrice =
-            quote.regularMarketPrice || 0;
-
-          const previousClose =
-            quote.regularMarketPreviousClose ||
-            currentPrice;
-
-          const invested = data.totalInvested;
-          const currentValue =
-            currentPrice * data.quantity;
-
-          const pnl = currentValue - invested;
-
-          const percent =
-            invested > 0 ? (pnl / invested) * 100 : 0;
-
-          const dayChange =
-            (currentPrice - previousClose) *
-            data.quantity;
-
-          const dayPercent =
-            previousClose > 0
-              ? ((currentPrice - previousClose) /
-                  previousClose) *
-                100
-              : 0;
-
-          return {
-            asset,
-            quantity: data.quantity,
-            avgPrice: +(
-              invested / data.quantity
-            ).toFixed(2),
-            currentPrice: +currentPrice.toFixed(2),
-            invested: +invested.toFixed(2),
-            currentValue: +currentValue.toFixed(2),
-            pnl: +pnl.toFixed(2),
-            percent: +percent.toFixed(2),
-            dayChange: +dayChange.toFixed(2),
-            dayPercent: +dayPercent.toFixed(2),
-          };
-        } catch {
-          return null;
-        }
-      }
-    );
-
     const positions = (
-      await Promise.all(positionPromises)
-    ).filter(Boolean);
+      await Promise.all(
+        Object.keys(holdingsMap).map(async (asset) => {
+          const data = holdingsMap[asset];
 
+          if (data.quantity <= 0) return null;
+
+          try {
+            const quote = await getCachedQuote(asset);
+
+            const currentPrice =
+              quote.regularMarketPrice || 0;
+
+            const previousClose =
+              quote.regularMarketPreviousClose ||
+              currentPrice;
+
+            const invested = data.totalInvested;
+            const currentValue =
+              currentPrice * data.quantity;
+
+            const pnl = currentValue - invested;
+
+            const percent =
+              invested > 0 ? (pnl / invested) * 100 : 0;
+
+            const dayChange =
+              (currentPrice - previousClose) *
+              data.quantity;
+
+            const dayPercent =
+              previousClose > 0
+                ? ((currentPrice - previousClose) /
+                    previousClose) *
+                  100
+                : 0;
+
+            return {
+              asset,
+              quantity: data.quantity,
+              avgPrice: +(
+                invested / data.quantity
+              ).toFixed(2),
+              currentPrice: +currentPrice.toFixed(2),
+              invested: +invested.toFixed(2),
+              currentValue: +currentValue.toFixed(2),
+              pnl: +pnl.toFixed(2),
+              percent: +percent.toFixed(2),
+              dayChange: +dayChange.toFixed(2),
+              dayPercent: +dayPercent.toFixed(2),
+            };
+          } catch {
+            return null;
+          }
+        })
+      )
+    ).filter(Boolean);
 
     const totalInvested = positions.reduce(
       (acc, p) => acc + p.invested,
@@ -166,30 +167,15 @@ export const getDashboard = async (req, res) => {
         ? (totalDayPnL / totalCurrentValue) * 100
         : 0;
 
-    const positionsWithAllocation =
-      positions.map((p) => ({
-        ...p,
-        allocation:
-          totalCurrentValue > 0
-            ? +(
-                (p.currentValue /
-                  totalCurrentValue) *
-                100
-              ).toFixed(2)
-            : 0,
-      }));
-
     const portfolioValue =
       balance + totalCurrentValue;
 
-    const latestTransactions =
-      await Transaction.find({ user: userId })
-        .sort({ createdAt: -1 })
-        .limit(5);
+    const latestTransactions = transactions
+      .slice(-5)
+      .reverse();
+
     const watchlistDoc =
-      await Watchlist.findOne({
-        user: userId,
-      });
+      await Watchlist.findOne({ user: userId });
 
     let watchlist = [];
 
@@ -203,9 +189,7 @@ export const getDashboard = async (req, res) => {
           .map(async (stock) => {
             try {
               const quote =
-                await getCachedQuote(
-                  stock.asset
-                );
+                await getCachedQuote(stock.asset);
 
               const currentPrice =
                 quote.regularMarketPrice || 0;
@@ -215,8 +199,7 @@ export const getDashboard = async (req, res) => {
                 currentPrice;
 
               const dayChange =
-                currentPrice -
-                previousClose;
+                currentPrice - previousClose;
 
               const dayPercent =
                 previousClose > 0
@@ -250,6 +233,7 @@ export const getDashboard = async (req, res) => {
           })
       );
     }
+
     res.json({
       overview: {
         availableBalance:
@@ -269,7 +253,7 @@ export const getDashboard = async (req, res) => {
         totalDayPercent:
           +totalDayPercent.toFixed(2),
       },
-      positions: positionsWithAllocation,
+      positions,
       transactions: latestTransactions,
       watchlist,
     });

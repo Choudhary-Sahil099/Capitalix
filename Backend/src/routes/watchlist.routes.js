@@ -8,10 +8,10 @@ import {
 
 const router = express.Router();
 
-router.post("/", authMiddleware, addToWatchlist);
+router.post("/add", authMiddleware, addToWatchlist); // route to add the stock
 
-router.get("/", authMiddleware, getWatchlist);
+router.get("/", authMiddleware, getWatchlist);// to get the stocks in the watchlist
 
-router.delete("/:asset", authMiddleware, removeFromWatchlist);
+router.delete("/:asset", authMiddleware, removeFromWatchlist);// remove the stock from the watchlist
 
 export default router;

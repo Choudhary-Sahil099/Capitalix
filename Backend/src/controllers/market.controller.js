@@ -154,7 +154,7 @@ export const getStockChart = async (req, res) => {
     res.json(chartData);
 
   } catch (error) {
-    console.error("🔥 BACKEND CHART ERROR:", error);
+    console.error("BACKEND CHART ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };

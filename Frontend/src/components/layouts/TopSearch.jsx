@@ -53,7 +53,7 @@ const TopSearch = () => {
         />
 
         {results.length > 0 && (
-          <div className="absolute top-14 w-full bg-[#1a1a1a] border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+          <div className="absolute top-14 w-full bg-[#1a1a1a] border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto z-50 hide-scrollbar">
             {results.map((stock) => (
               <div
                 key={stock.symbol}
