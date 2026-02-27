@@ -19,7 +19,11 @@ async function getCachedQuote(asset) {
     return priceCache[asset].data;
   }
 
-  const quote = await yahooFinance.quote(asset + ".NS");
+  const symbol = asset.endsWith(".NS")
+    ? asset
+    : asset + ".NS";
+
+  const quote = await yahooFinance.quote(symbol);
 
   priceCache[asset] = {
     data: quote,
@@ -49,10 +53,10 @@ export const getDashboard = async (req, res) => {
     }).sort({ createdAt: 1 });
 
     const holdingsMap = {};
+    let totalRealizedPnL = 0;
 
     transactions.forEach((t) => {
       const asset = t.asset;
-      const amount = t.price * t.quantity;
 
       if (!holdingsMap[asset]) {
         holdingsMap[asset] = {
@@ -63,7 +67,7 @@ export const getDashboard = async (req, res) => {
 
       if (t.type === "buy") {
         holdingsMap[asset].quantity += t.quantity;
-        holdingsMap[asset].totalInvested += amount;
+        holdingsMap[asset].totalInvested += t.totalAmount;
       }
 
       if (t.type === "sell") {
@@ -73,10 +77,19 @@ export const getDashboard = async (req, res) => {
           const avgPrice =
             holdingsMap[asset].totalInvested / currentQty;
 
+          const realizedProfit =
+            (t.price - avgPrice) * t.quantity;
+
+          totalRealizedPnL += realizedProfit;
+
+          holdingsMap[asset].quantity -= t.quantity;
           holdingsMap[asset].totalInvested -=
             avgPrice * t.quantity;
 
-          holdingsMap[asset].quantity -= t.quantity;
+          if (holdingsMap[asset].quantity <= 0) {
+            holdingsMap[asset].quantity = 0;
+            holdingsMap[asset].totalInvested = 0;
+          }
         }
       }
     });
@@ -92,30 +105,19 @@ export const getDashboard = async (req, res) => {
             const quote = await getCachedQuote(asset);
 
             const currentPrice =
-              quote.regularMarketPrice || 0;
-
-            const previousClose =
-              quote.regularMarketPreviousClose ||
-              currentPrice;
+              quote?.regularMarketPrice ?? 0;
 
             const invested = data.totalInvested;
+
             const currentValue =
               currentPrice * data.quantity;
 
-            const pnl = currentValue - invested;
+            const unrealizedPnL =
+              currentValue - invested;
 
             const percent =
-              invested > 0 ? (pnl / invested) * 100 : 0;
-
-            const dayChange =
-              (currentPrice - previousClose) *
-              data.quantity;
-
-            const dayPercent =
-              previousClose > 0
-                ? ((currentPrice - previousClose) /
-                    previousClose) *
-                  100
+              invested > 0
+                ? (unrealizedPnL / invested) * 100
                 : 0;
 
             return {
@@ -127,10 +129,8 @@ export const getDashboard = async (req, res) => {
               currentPrice: +currentPrice.toFixed(2),
               invested: +invested.toFixed(2),
               currentValue: +currentValue.toFixed(2),
-              pnl: +pnl.toFixed(2),
+              pnl: +unrealizedPnL.toFixed(2),
               percent: +percent.toFixed(2),
-              dayChange: +dayChange.toFixed(2),
-              dayPercent: +dayPercent.toFixed(2),
             };
           } catch {
             return null;
@@ -149,22 +149,15 @@ export const getDashboard = async (req, res) => {
       0
     );
 
-    const totalPnL =
+    const totalUnrealizedPnL =
       totalCurrentValue - totalInvested;
+
+    const totalPnL =
+      totalRealizedPnL + totalUnrealizedPnL;
 
     const totalReturnPercent =
       totalInvested > 0
         ? (totalPnL / totalInvested) * 100
-        : 0;
-
-    const totalDayPnL = positions.reduce(
-      (acc, p) => acc + p.dayChange,
-      0
-    );
-
-    const totalDayPercent =
-      totalCurrentValue > 0
-        ? (totalDayPnL / totalCurrentValue) * 100
         : 0;
 
     const portfolioValue =
@@ -192,42 +185,19 @@ export const getDashboard = async (req, res) => {
                 await getCachedQuote(stock.asset);
 
               const currentPrice =
-                quote.regularMarketPrice || 0;
-
-              const previousClose =
-                quote.regularMarketPreviousClose ||
-                currentPrice;
-
-              const dayChange =
-                currentPrice - previousClose;
-
-              const dayPercent =
-                previousClose > 0
-                  ? ((currentPrice -
-                      previousClose) /
-                      previousClose) *
-                    100
-                  : 0;
+                quote?.regularMarketPrice ?? 0;
 
               return {
                 asset: stock.asset,
-                assetName:
-                  stock.assetName,
+                assetName: stock.assetName,
                 currentPrice:
                   +currentPrice.toFixed(2),
-                dayChange:
-                  +dayChange.toFixed(2),
-                dayPercent:
-                  +dayPercent.toFixed(2),
               };
             } catch {
               return {
                 asset: stock.asset,
-                assetName:
-                  stock.assetName,
+                assetName: stock.assetName,
                 currentPrice: 0,
-                dayChange: 0,
-                dayPercent: 0,
               };
             }
           })
@@ -244,14 +214,14 @@ export const getDashboard = async (req, res) => {
           +totalInvested.toFixed(2),
         totalCurrentValue:
           +totalCurrentValue.toFixed(2),
+        totalRealizedPnL:
+          +totalRealizedPnL.toFixed(2),
+        totalUnrealizedPnL:
+          +totalUnrealizedPnL.toFixed(2),
         totalPnL:
           +totalPnL.toFixed(2),
         totalReturnPercent:
           +totalReturnPercent.toFixed(2),
-        totalDayPnL:
-          +totalDayPnL.toFixed(2),
-        totalDayPercent:
-          +totalDayPercent.toFixed(2),
       },
       positions,
       transactions: latestTransactions,

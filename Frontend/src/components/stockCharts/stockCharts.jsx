@@ -17,7 +17,7 @@ const StockChart = ({ symbol }) => {
 
     const fetchChart = async () => {
       try {
-        const res = await API.get(`/market/chart/${symbol}`); // ✅ FIXED
+        const res = await API.get(`/market/chart/${symbol}`);
         setData(res.data);
       } catch (err) {
         console.error("Chart fetch error:", err);

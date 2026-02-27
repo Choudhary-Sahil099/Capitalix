@@ -23,6 +23,7 @@ const StockDetails = () => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
   useEffect(() => {
+    let interval;
     const fetchStock = async () => {
       try {
         const res = await API.get(`/market/quote/${symbol}`);
@@ -32,6 +33,8 @@ const StockDetails = () => {
       }
     };
     fetchStock();
+    interval = setInterval(fetchStock,4000);
+    return () =>clearInterval(interval);
   }, [symbol]);
 
   useEffect(() => {
@@ -124,6 +127,7 @@ const StockDetails = () => {
   }, []);
 
   useEffect(() => {
+    let interval;
     const fetchChart = async () => {
       if (!candleSeriesRef.current || !chartRef.current) return;
 
@@ -194,6 +198,8 @@ const StockDetails = () => {
     };
 
     fetchChart();
+    interval = setInterval(fetchChart, 4000);
+    return () => clearInterval(interval);
   }, [symbol, range]);
 
   const handleTrade = async (type) => {

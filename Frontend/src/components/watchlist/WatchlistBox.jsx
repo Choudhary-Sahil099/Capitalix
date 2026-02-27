@@ -34,7 +34,7 @@ const WatchlistBox = () => {
 
   const interval = setInterval(() => {
     fetchWatchlist();
-  }, 10000); // refresh every 10 sec
+  }, 2000); // refresh every 2 sec
 
   return () => clearInterval(interval);
 
