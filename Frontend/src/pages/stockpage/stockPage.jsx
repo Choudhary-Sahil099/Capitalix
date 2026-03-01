@@ -74,7 +74,6 @@ const StockDetails = () => {
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
-
     const chart = createChart(chartContainerRef.current, {
       autoSize: true,
       height: 500,

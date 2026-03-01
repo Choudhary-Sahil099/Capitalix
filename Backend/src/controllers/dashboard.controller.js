@@ -12,16 +12,11 @@ const priceCache = {};
 async function getCachedQuote(asset) {
   const now = Date.now();
 
-  if (
-    priceCache[asset] &&
-    now - priceCache[asset].timestamp < 30000
-  ) {
+  if (priceCache[asset] && now - priceCache[asset].timestamp < 30000) {
     return priceCache[asset].data;
   }
 
-  const symbol = asset.endsWith(".NS")
-    ? asset
-    : asset + ".NS";
+  const symbol = asset.endsWith(".NS") ? asset : asset + ".NS";
 
   const quote = await yahooFinance.quote(symbol);
 
@@ -74,17 +69,14 @@ export const getDashboard = async (req, res) => {
         const currentQty = holdingsMap[asset].quantity;
 
         if (currentQty > 0) {
-          const avgPrice =
-            holdingsMap[asset].totalInvested / currentQty;
+          const avgPrice = holdingsMap[asset].totalInvested / currentQty;
 
-          const realizedProfit =
-            (t.price - avgPrice) * t.quantity;
+          const realizedProfit = (t.price - avgPrice) * t.quantity;
 
           totalRealizedPnL += realizedProfit;
 
           holdingsMap[asset].quantity -= t.quantity;
-          holdingsMap[asset].totalInvested -=
-            avgPrice * t.quantity;
+          holdingsMap[asset].totalInvested -= avgPrice * t.quantity;
 
           if (holdingsMap[asset].quantity <= 0) {
             holdingsMap[asset].quantity = 0;
@@ -104,28 +96,20 @@ export const getDashboard = async (req, res) => {
           try {
             const quote = await getCachedQuote(asset);
 
-            const currentPrice =
-              quote?.regularMarketPrice ?? 0;
+            const currentPrice = quote?.regularMarketPrice ?? 0;
 
             const invested = data.totalInvested;
 
-            const currentValue =
-              currentPrice * data.quantity;
+            const currentValue = currentPrice * data.quantity;
 
-            const unrealizedPnL =
-              currentValue - invested;
+            const unrealizedPnL = currentValue - invested;
 
-            const percent =
-              invested > 0
-                ? (unrealizedPnL / invested) * 100
-                : 0;
+            const percent = invested > 0 ? (unrealizedPnL / invested) * 100 : 0;
 
             return {
               asset,
               quantity: data.quantity,
-              avgPrice: +(
-                invested / data.quantity
-              ).toFixed(2),
+              avgPrice: +(invested / data.quantity).toFixed(2),
               currentPrice: +currentPrice.toFixed(2),
               invested: +invested.toFixed(2),
               currentValue: +currentValue.toFixed(2),
@@ -135,93 +119,73 @@ export const getDashboard = async (req, res) => {
           } catch {
             return null;
           }
-        })
+        }),
       )
     ).filter(Boolean);
 
-    const totalInvested = positions.reduce(
-      (acc, p) => acc + p.invested,
-      0
-    );
+    const totalInvested = positions.reduce((acc, p) => acc + p.invested, 0);
 
     const totalCurrentValue = positions.reduce(
       (acc, p) => acc + p.currentValue,
-      0
+      0,
     );
 
-    const totalUnrealizedPnL =
-      totalCurrentValue - totalInvested;
+    const totalUnrealizedPnL = totalCurrentValue - totalInvested;
 
-    const totalPnL =
-      totalRealizedPnL + totalUnrealizedPnL;
+    const totalPnL = totalRealizedPnL + totalUnrealizedPnL;
 
     const totalReturnPercent =
-      totalInvested > 0
-        ? (totalPnL / totalInvested) * 100
-        : 0;
+      totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
 
-    const portfolioValue =
-      balance + totalCurrentValue;
+    const portfolioValue = balance + totalCurrentValue;
 
-    const latestTransactions = transactions
-      .slice(-5)
-      .reverse();
+    const latestTransactions = transactions.slice(-5).reverse();
 
-    const watchlistDoc =
-      await Watchlist.findOne({ user: userId });
+    const watchlistDoc = await Watchlist.findOne({ user: userId });
 
     let watchlist = [];
 
-    if (
-      watchlistDoc &&
-      watchlistDoc.stocks.length > 0
-    ) {
+    if (watchlistDoc && watchlistDoc.stocks.length > 0) {
+      // updating the backend calling
       watchlist = await Promise.all(
-        watchlistDoc.stocks
-          .slice(0, 5)
-          .map(async (stock) => {
-            try {
-              const quote =
-                await getCachedQuote(stock.asset);
+        watchlistDoc.stocks.slice(0, 5).map(async (stock) => {
+          try {
+            const quote = await getCachedQuote(stock.asset);
 
-              const currentPrice =
-                quote?.regularMarketPrice ?? 0;
+            const currentPrice = quote?.regularMarketPrice ?? 0;
+            const change = quote?.regularMarketChange ?? 0;
+            const changePercent = quote?.regularMarketChangePercent ?? 0;
 
-              return {
-                asset: stock.asset,
-                assetName: stock.assetName,
-                currentPrice:
-                  +currentPrice.toFixed(2),
-              };
-            } catch {
-              return {
-                asset: stock.asset,
-                assetName: stock.assetName,
-                currentPrice: 0,
-              };
-            }
-          })
+            return {
+              asset: stock.asset,
+              assetName: stock.assetName,
+              currentPrice: +currentPrice.toFixed(2),
+              change: +change.toFixed(2),
+              changePercent: +changePercent.toFixed(2),
+            };
+          } catch {
+            return {
+              asset: stock.asset,
+              assetName: stock.assetName,
+              currentPrice: 0,
+              change: 0,
+              changePercent: 0,
+            };
+          }
+        }),
       );
     }
 
     res.json({
       overview: {
-        availableBalance:
-          +balance.toFixed(2),
-        portfolioValue:
-          +portfolioValue.toFixed(2),
-        totalInvested:
-          +totalInvested.toFixed(2),
-        totalCurrentValue:
-          +totalCurrentValue.toFixed(2),
-        totalRealizedPnL:
-          +totalRealizedPnL.toFixed(2),
-        totalUnrealizedPnL:
-          +totalUnrealizedPnL.toFixed(2),
-        totalPnL:
-          +totalPnL.toFixed(2),
-        totalReturnPercent:
-          +totalReturnPercent.toFixed(2),
+        availableBalance: +balance.toFixed(2),
+        portfolioValue: +portfolioValue.toFixed(2),
+        totalInvested: +totalInvested.toFixed(2),
+        totalCurrentValue: +totalCurrentValue.toFixed(2),
+        totalRealizedPnL: +totalRealizedPnL.toFixed(2),
+        totalUnrealizedPnL: +totalUnrealizedPnL.toFixed(2),
+        totalPnL: +totalPnL.toFixed(2),
+        totalReturnPercent: +totalReturnPercent.toFixed(2),
       },
       positions,
       transactions: latestTransactions,

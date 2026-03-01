@@ -1,13 +1,15 @@
 import React from "react";
 
 const CurrentWatchlist = ({ watchlist = [] }) => {
-
+  
+  // map the frontend logic with the backend data produced to solve the problem of the market price and the rate change
   const stocks = watchlist.slice(0, 5).map((s) => ({
     _id: s.asset,
     stock: s.assetName,
     symbol: s.asset,
-    rate: s.dayChange || 0, // changing the price of the stock to the required format
-    change: s.dayPercent || 0,
+    price: s.currentPrice || 0,
+    change: s.change || 0,
+    percent: s.changePercent || 0,
   }));
 
   return (
@@ -28,7 +30,10 @@ const CurrentWatchlist = ({ watchlist = [] }) => {
           <tbody className="block h-32 overflow-y-auto hide-scrollbar">
             {stocks.length === 0 ? (
               <tr className="table w-full">
-                <td colSpan="4" className="text-center text-gray-500 py-4">
+                <td
+                  colSpan="4"
+                  className="text-center text-gray-500 py-4"
+                >
                   No stocks in watchlist
                 </td>
               </tr>
@@ -41,28 +46,35 @@ const CurrentWatchlist = ({ watchlist = [] }) => {
                   <td className="py-2 truncate">
                     {item.stock}
                   </td>
+
                   <td className="text-gray-400">
                     {item.symbol}
                   </td>
                   <td>
                     <span className="text-xs px-2 py-1 rounded-full bg-blue-900 text-blue-300">
-                      ₹{item.rate.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                     </span>
                   </td>
                   <td className="text-right font-semibold">
-                    <div className="font-semibold">
-                      ₹{item.rate.toFixed(2)}
-                    </div>
-
                     <div
-                      className={`text-xs ${
+                      className={`${
                         item.change >= 0
                           ? "text-green-500"
                           : "text-red-500"
                       }`}
                     >
                       {item.change >= 0 ? "+" : ""}
-                      {item.change.toFixed(2)}%
+                      ₹{item.change.toFixed(2)}
+                    </div>
+                    <div
+                      className={`text-xs ${
+                        item.percent >= 0
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {item.percent >= 0 ? "+" : ""}
+                      {item.percent.toFixed(2)}%
                     </div>
                   </td>
                 </tr>
