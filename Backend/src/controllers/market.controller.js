@@ -92,17 +92,17 @@ export const getStockChart = async (req, res) => {
     switch (range) {
       case "1d":
         startDate.setDate(now.getDate() - 1);
-        interval = "5m";
+        interval = "5m";   // intraday
         break;
 
       case "1w":
         startDate.setDate(now.getDate() - 7);
-        interval = "15m";
+        interval = "30m";  // different from 1d
         break;
 
       case "1m":
         startDate.setMonth(now.getMonth() - 1);
-        interval = "1h";
+        interval = "1d";
         break;
 
       case "6m":
@@ -123,38 +123,32 @@ export const getStockChart = async (req, res) => {
       interval,
     });
 
-    if (!result || !result.quotes || result.quotes.length === 0) {
+    if (!result?.quotes?.length) {
       return res.status(404).json({ message: "No chart data found" });
     }
-    const uniqueMap = new Map();
 
-    result.quotes.forEach((item) => {
-      if (
-        item.date &&
-        item.open !== null &&
-        item.high !== null &&
-        item.low !== null &&
-        item.close !== null
-      ) {
-        uniqueMap.set(item.date, {
-          date: item.date,
-          open: item.open,
-          high: item.high,
-          low: item.low,
-          close: item.close,
-          volume: item.volume,
-        });
-      }
-    });
-
-    const chartData = Array.from(uniqueMap.values()).sort(
-      (a, b) => a.date - b.date
-    );
+    const chartData = result.quotes
+      .filter(
+        (item) =>
+          item.date &&
+          item.open !== null &&
+          item.high !== null &&
+          item.low !== null &&
+          item.close !== null
+      )
+      .map((item) => ({
+        date: item.date,
+        open: item.open,
+        high: item.high,
+        low: item.low,
+        close: item.close,
+        volume: item.volume,
+      }));
 
     res.json(chartData);
 
   } catch (error) {
-    console.error("BACKEND CHART ERROR:", error);
-    res.status(500).json({ message: error.message });
+    console.error("BACKEND CHART ERROR:", error.message);
+    res.status(500).json({ message: "Chart fetch failed" });
   }
 };

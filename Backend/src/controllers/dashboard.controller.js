@@ -95,13 +95,9 @@ export const getDashboard = async (req, res) => {
 
           try {
             const quote = await getCachedQuote(asset);
-
             const currentPrice = quote?.regularMarketPrice ?? 0;
-
             const invested = data.totalInvested;
-
             const currentValue = currentPrice * data.quantity;
-
             const unrealizedPnL = currentValue - invested;
 
             const percent = invested > 0 ? (unrealizedPnL / invested) * 100 : 0;

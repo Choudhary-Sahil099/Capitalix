@@ -12,10 +12,10 @@ const StockDetails = () => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candleSeriesRef = useRef(null);
-  const clampRef = useRef(null);
+  const lastCandleTimeRef = useRef(null);
   const [stockInfo, setStockInfo] = useState(null);
   const [range, setRange] = useState("1y");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [tradeLoading, setTradeLoading] = useState(false);
   const [tradeError, setTradeError] = useState("");
@@ -23,25 +23,124 @@ const StockDetails = () => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
   useEffect(() => {
+    if (!chartContainerRef.current) return;
+
+    const chart = createChart(chartContainerRef.current, {
+      autoSize: true,
+      height: 500,
+      layout: {
+        background: { color: "#0f0f0f" },
+        textColor: "#d1d5db",
+      },
+      grid: {
+        vertLines: { color: "#1f2937" },
+        horzLines: { color: "#1f2937" },
+      },
+      rightPriceScale: {
+        borderColor: "#374151",
+      },
+      timeScale: {
+        borderColor: "#374151",
+        fixRightEdge: true,
+      },
+    });
+
+    const candleSeries = chart.addSeries(CandlestickSeries, {
+      upColor: "#16a34a",
+      downColor: "#dc2626",
+      borderVisible: false,
+      wickUpColor: "#16a34a",
+      wickDownColor: "#dc2626",
+    });
+
+    chartRef.current = chart;
+    candleSeriesRef.current = candleSeries;
+
+    return () => chart.remove();
+  }, []);
+
+  useEffect(() => {
+    const loadHistorical = async () => {
+      if (!candleSeriesRef.current) return;
+
+      setLoading(true);
+
+      try {
+        const res = await API.get(
+          `/market/chart/${symbol}?range=${range}`
+        );
+
+        const formattedData = res.data.map((item) => {
+          const date = new Date(item.date);
+
+          const time =
+            range === "1d" || range === "1w" || range === "1m"
+              ? Math.floor(date.getTime() / 1000)
+              : date.toISOString().split("T")[0];
+
+          return {
+            time,
+            open: item.open,
+            high: item.high,
+            low: item.low,
+            close: item.close,
+          };
+        });
+
+        candleSeriesRef.current.setData(formattedData);
+        chartRef.current.timeScale().fitContent();
+
+        if (formattedData.length > 0) {
+          lastCandleTimeRef.current =
+            formattedData[formattedData.length - 1].time;
+        }
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHistorical();
+  }, [symbol, range]);
+
+  useEffect(() => {
     let interval;
-    const fetchStock = async () => {
+
+    const fetchLivePrice = async () => {
       try {
         const res = await API.get(`/market/quote/${symbol}`);
-        setStockInfo(res.data);
+        const data = res.data;
+        setStockInfo(data);
+
+        if (!candleSeriesRef.current || !lastCandleTimeRef.current) return;
+        candleSeriesRef.current.update({
+          time: lastCandleTimeRef.current,
+          open: data.price,
+          high: data.price,
+          low: data.price,
+          close: data.price,
+        });
+
       } catch (err) {
         console.error(err);
       }
     };
-    fetchStock();
-    interval = setInterval(fetchStock,4000);
-    return () =>clearInterval(interval);
+
+    fetchLivePrice();
+    interval = setInterval(fetchLivePrice, 4000);
+
+    return () => clearInterval(interval);
   }, [symbol]);
 
   useEffect(() => {
     const checkWatchlist = async () => {
       try {
         const res = await API.get("/watchlist");
-        const exists = res.data.some((item) => item.symbol === symbol);
+        const exists = res.data.some(
+          (item) => item.asset === symbol
+        );
         setIsInWatchlist(exists);
       } catch (err) {
         console.error(err);
@@ -57,7 +156,7 @@ const StockDetails = () => {
     try {
       setWatchlistLoading(true);
 
-      const cleanSymbol = stockInfo.symbol.replace(".NS", ""); // the backend only excepts the format or the stock name not with the teh .ns
+      const cleanSymbol = stockInfo.symbol.replace(".NS", "");
 
       await API.post("/watchlist/add", {
         asset: cleanSymbol,
@@ -71,135 +170,6 @@ const StockDetails = () => {
       setWatchlistLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!chartContainerRef.current) return;
-    const chart = createChart(chartContainerRef.current, {
-      autoSize: true,
-      height: 500,
-      layout: {
-        background: { color: "#0f0f0f" },
-        textColor: "#d1d5db",
-      },
-      grid: {
-        vertLines: { color: "#1f2937" },
-        horzLines: { color: "#1f2937" },
-      },
-      rightPriceScale: {
-        borderColor: "#374151",
-      },
-      handleScroll: {
-        mouseWheel: true,
-        pressedMouseMove: true,
-        horzTouchDrag: true,
-        vertTouchDrag: false,
-      },
-      handleScale: {
-        mouseWheel: true,
-        pinch: true,
-        axisPressedMouseMove: true,
-      },
-      timeScale: {
-        borderColor: "#374151",
-        rightBarStaysOnScroll: false,
-        rightOffset: 0,
-        fixRightEdge: true,
-        lockVisibleTimeRangeOnResize: true,
-        minBarSpacing: 5,
-      },
-    });
-
-    const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: "#16a34a",
-      downColor: "#dc2626",
-      borderVisible: false,
-      wickUpColor: "#16a34a",
-      wickDownColor: "#dc2626",
-    });
-
-    chartRef.current = chart;
-    candleSeriesRef.current = candleSeries;
-
-    return () => {
-      chart.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    let interval;
-    const fetchChart = async () => {
-      if (!candleSeriesRef.current || !chartRef.current) return;
-
-      try {
-        setLoading(true);
-        const res = await API.get(`/market/chart/${symbol}?range=${range}`);
-
-        const formattedData = res.data.map((item) => {
-          const date = new Date(item.date);
-          return {
-            time:
-              range === "1d" || range === "1w" || range === "1m"
-                ? Math.floor(date.getTime() / 1000)
-                : date.toISOString().split("T")[0],
-            open: item.open,
-            high: item.high,
-            low: item.low,
-            close: item.close,
-          };
-        });
-
-        candleSeriesRef.current.setData(formattedData);
-
-        const timeScale = chartRef.current.timeScale();
-        timeScale.fitContent();
-        timeScale.scrollToRealTime();
-
-        const totalBars = formattedData.length;
-
-        if (clampRef.current) {
-          chartRef.current.unsubscribeVisibleLogicalRangeChange(
-            clampRef.current,
-          );
-        }
-
-        const clampRange = (range) => {
-          if (!range) return;
-
-          const length = range.to - range.from;
-          let newFrom = range.from;
-          let newTo = range.to;
-
-          if (range.from < 0) {
-            newFrom = 0;
-            newTo = length;
-          }
-
-          if (range.to > totalBars) {
-            newTo = totalBars;
-            newFrom = totalBars - length;
-          }
-
-          if (newFrom !== range.from || newTo !== range.to) {
-            timeScale.setVisibleLogicalRange({
-              from: newFrom,
-              to: newTo,
-            });
-          }
-        };
-
-        clampRef.current = clampRange;
-        chartRef.current.subscribeVisibleLogicalRangeChange(clampRange);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChart();
-    interval = setInterval(fetchChart, 4000);
-    return () => clearInterval(interval);
-  }, [symbol, range]);
 
   const handleTrade = async (type) => {
     if (!quantity || quantity <= 0) return;
@@ -217,7 +187,9 @@ const StockDetails = () => {
 
       alert(`${type.toUpperCase()} order placed`);
     } catch (err) {
-      setTradeError(err.response?.data?.message || "Transaction failed");
+      setTradeError(
+        err.response?.data?.message || "Transaction failed"
+      );
     } finally {
       setTradeLoading(false);
     }
@@ -230,21 +202,31 @@ const StockDetails = () => {
           {stockInfo && (
             <div className="mb-4">
               <div className="flex gap-5 items-center">
-                <h1 className="text-3xl font-bold">{stockInfo.symbol}</h1>
+                <h1 className="text-3xl font-bold">
+                  {stockInfo.symbol}
+                </h1>
                 <Plus
                   onClick={handleAddToWatchlist}
                   className={`border rounded-sm p-1 cursor-pointer transition ${
                     isInWatchlist
                       ? "bg-green-500 text-black border-green-500"
                       : "border-white hover:bg-white hover:text-black"
-                  } ${watchlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${
+                    watchlistLoading
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
                 />
               </div>
 
-              <p className="text-gray-400">{stockInfo.name}</p>
+              <p className="text-gray-400">
+                {stockInfo.name}
+              </p>
 
               <div className="flex items-center gap-4 mt-2">
-                <span className="text-4xl font-bold">₹{stockInfo.price}</span>
+                <span className="text-4xl font-bold">
+                  ₹{stockInfo.price}
+                </span>
 
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -289,11 +271,15 @@ const StockDetails = () => {
 
           <div className="text-gray-400 mb-3">
             Total: ₹
-            {stockInfo ? (stockInfo.price * quantity).toFixed(2) : "0.00"}
+            {stockInfo
+              ? (stockInfo.price * quantity).toFixed(2)
+              : "0.00"}
           </div>
 
           {tradeError && (
-            <div className="text-red-400 text-sm mb-2">{tradeError}</div>
+            <div className="text-red-400 text-sm mb-2">
+              {tradeError}
+            </div>
           )}
 
           <div className="flex gap-3">
@@ -316,12 +302,18 @@ const StockDetails = () => {
         </div>
       </div>
 
-      {loading && <div className="text-gray-400 mt-4">Loading chart...</div>}
+      <div className="relative mt-4">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-2xl z-10">
+            <div className="h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
 
-      <div
-        ref={chartContainerRef}
-        className="w-full h-[500px] rounded-2xl border border-gray-800 mt-4"
-      />
+        <div
+          ref={chartContainerRef}
+          className="w-full h-[500px] rounded-2xl border border-gray-800"
+        />
+      </div>
     </div>
   );
 };
