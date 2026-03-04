@@ -5,6 +5,7 @@ import API from '../../api/axios'
 const TransactionRec = () => {
   const [range, setRange] = useState("All Categories");
   const [transactions, setTransactions] = useState([]);
+  const [search, setSearch] = useState("");
 
   const filters = [
     { label: "All Categories", icon: Layers },
@@ -23,11 +24,17 @@ const TransactionRec = () => {
     };
 
     fetchTransactions();
-  },[])
+  },[]);
+
+  const filteredTransactions = transactions.filter((tx) =>
+  tx.asset.toLowerCase().includes(search.toLowerCase())
+);
   return (
     <div className="w-full h-168 rounded-xl bg-[#0e0d0d] flex flex-col p-6">
       <div className="flex justify-between items-center px-3 pb-4 border-b border-white/5">
         <input
+          value = {search}
+          onChange={(e) => setSearch(e.target.value)}
           className="bg-black w-50 h-10 rounded-md text-white p-4 outline-none placeholder:text-gray-500"
           placeholder="Search"
         />
@@ -64,7 +71,7 @@ const TransactionRec = () => {
       </div>
       <div className="flex-1 overflow-y-auto mt-3 pr-2 hide-scrollbar">
         <div className="flex flex-col gap-3">
-          {transactions.map((tx) => (
+          {filteredTransactions.map((tx) => (
             <div
               key={tx._id}
               className="grid grid-cols-[2.5fr_1.5fr_1fr_0.8fr_1fr_1fr]
