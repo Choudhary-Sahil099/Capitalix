@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import API from "../../api/axios";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const IndexCard = ({ item }) => {
+  const navigate = useNavigate();
   const isPositive = item.percent >= 0;
 
   return (
-    <div className="bg-gradient-to-br from-[#141414] to-[#0f0f0f] p-6 rounded-2xl shadow-lg hover:scale-[1.02] transition-all duration-300 border border-[#1f1f1f]">
+    <div
+    onClick={() => navigate(`/dashboard/stock/${item.symbol}`)}
+    className="bg-gradient-to-br from-[#141414] to-[#0f0f0f] p-6 rounded-2xl shadow-lg hover:scale-[1.02] transition-all duration-300 border border-[#1f1f1f]">
       <h3 className="text-gray-400 text-sm uppercase tracking-wide">
         {item.name}
       </h3>
@@ -28,6 +32,7 @@ const IndexCard = ({ item }) => {
 };
 
 const MoversCard = ({ title, data }) => {
+  const navigate = useNavigate();
   return (
     <div className="bg-[#121212] p-6 rounded-2xl shadow-lg border border-[#1f1f1f]">
       <h3 className="text-white text-lg font-semibold mb-4">
@@ -41,6 +46,7 @@ const MoversCard = ({ title, data }) => {
           return (
             <div
               key={item.symbol}
+              onClick={() => navigate(`/dashboard/stock/${item.symbol}`)}
               className="flex justify-between items-center hover:bg-[#1c1c1c] p-2 rounded-lg transition-all cursor-pointer"
             >
               <div>
