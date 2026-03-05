@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Sun, Bell, CircleUser } from "lucide-react";
 import API from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const TopSearch = () => {
   const [query, setQuery] = useState("");
@@ -76,7 +77,7 @@ const TopSearch = () => {
       </div>
 
       <div className="flex gap-6 justify-center items-center text-white">
-        <Bell size={28} />
+        <Bell size={28} onClick={() => toast.error("Available soon")} />
 
         <div className="flex justify-center items-center gap-2">
           <CircleUser size={28} />
@@ -85,7 +86,7 @@ const TopSearch = () => {
           </span>
         </div>
 
-        <Sun size={28} />
+        <Sun size={28}  onClick={() => toast.error("Available soon")}/>
       </div>
     </div>
   );

@@ -3,9 +3,10 @@ import Nvidia from "../../assets/nvidia.png";
 import Alphabet from "../../assets/Alphabet.webp";
 import { Trash2 } from "lucide-react";
 import API from "../../api/axios";
-
+import { useNavigate } from "react-router-dom";
 // adding the feature of the remove the watchlist form the watchlist section
 const WatchlistBox = () => {
+  const navigate = useNavigate();
   const [watchlist, setWatchlist] = useState([]);
   const [selectedStock, setSelectedStock] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ const WatchlistBox = () => {
   try {
     await API.delete(`/watchlist/${asset}`);
     const { data } = await API.get("/watchlist");
-console.log("WATCHLIST RESPONSE:", data);
+// console.log("WATCHLIST RESPONSE:", data);
     const updatedStocks = data || [];
 
     setWatchlist(updatedStocks);
@@ -148,10 +149,10 @@ console.log("WATCHLIST RESPONSE:", data);
         <div className="h-[380px] w-[350px] bg-[#0e0d0d] rounded-xl p-6">
           {selectedStock ? (
             <>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-white hover:cursor-pointer" onClick={() => navigate(`/dashboard/stock/${selectedStock.asset}`)}>
                 {selectedStock.asset}
               </h2>
-              <p className="text-sm text-gray-400">{selectedStock.assetName}</p>
+              <p className="text-sm text-gray-400 ">{selectedStock.assetName}</p>
 
               <div className="mt-6">
                 <p className="text-3xl font-bold text-white">

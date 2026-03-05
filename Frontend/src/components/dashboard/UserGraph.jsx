@@ -21,7 +21,7 @@ const UserGraph = ({ positions = [], balance = 0, transactions = [] }) => {
 
     const now = new Date();
 
-    let runningTotal = 0;
+    let runningTotal = balance;
 
     const filtered = transactions.filter((tx) => {
       const txDate = new Date(tx.createdAt);

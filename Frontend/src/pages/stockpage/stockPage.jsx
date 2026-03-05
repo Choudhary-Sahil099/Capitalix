@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Plus } from "lucide-react";
 import API from "../../api/axios";
 import { createChart, CandlestickSeries } from "lightweight-charts";
-
+import toast from "react-hot-toast";
 const ranges = ["1d", "1w", "1m", "6m", "1y"];
 
 const StockDetails = () => {
@@ -185,7 +185,7 @@ const StockDetails = () => {
         quantity: Number(quantity),
       });
 
-      alert(`${type.toUpperCase()} order placed`);
+      toast.success("order placed");
     } catch (err) {
       setTradeError(
         err.response?.data?.message || "Transaction failed"
