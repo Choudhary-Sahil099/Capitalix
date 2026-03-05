@@ -80,7 +80,8 @@ const TransactionRec = () => {
             >
               <div className="flex flex-col">
                 <span className="text-white font-medium truncate">
-                  {tx.asset}
+                  {/* remove the ns symbol of the stock */}
+                  {tx.asset.replace(".NS","")}
                 </span>
               </div>
               <div className="flex flex-col text-sm text-gray-400">

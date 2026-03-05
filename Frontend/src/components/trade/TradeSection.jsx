@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import API from "../../api/axios";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 const TradeSection = () => {
+  const navigate = useNavigate();
   const [positions, setPositions] = useState([]);
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,9 +96,11 @@ const TradeSection = () => {
                 <div
                   key={p.asset}
                   className="flex justify-between items-center p-3 rounded-lg hover:bg-[#1a1a1a] transition-all"
+                  onClick={() => navigate(`/dashboard/stock/${p.asset.replace(".NS","")}`)}
+
                 >
                   <div>
-                    <div className="text-white font-semibold">{p.asset}</div>
+                    <div className="text-white font-semibold hover:cursor-pointer">{p.asset.replace(".NS", "")}</div>
                     <div className="text-gray-500 text-sm">
                       Qty: {p.quantity}
                     </div>

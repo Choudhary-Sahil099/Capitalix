@@ -4,6 +4,8 @@ import Alphabet from "../../assets/Alphabet.webp";
 import { Trash2 } from "lucide-react";
 import API from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import getStockLogo from "../../utils/getStockLogo";
+import defaultStock from "../../assets/DefaultStock.png";
 // adding the feature of the remove the watchlist form the watchlist section
 const WatchlistBox = () => {
   const navigate = useNavigate();
@@ -12,53 +14,50 @@ const WatchlistBox = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const fetchWatchlist = async () => {
+    const fetchWatchlist = async () => {
+      try {
+        const { data } = await API.get("/watchlist");
+        setWatchlist(data || []);
+
+        setSelectedStock((prev) => {
+          if (!prev) return data?.[0] || null;
+
+          const updated = data?.find((s) => s.asset === prev.asset);
+          return updated || data?.[0] || null;
+        });
+      } catch (err) {
+        console.log("Error fetching watchlist", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWatchlist();
+
+    const interval = setInterval(() => {
+      fetchWatchlist();
+    }, 2000); // refresh every 2 sec
+
+    return () => clearInterval(interval);
+  }, []);
+  const handleRemove = async (asset, e) => {
+    e.stopPropagation();
+
     try {
+      await API.delete(`/watchlist/${asset}`);
       const { data } = await API.get("/watchlist");
-      setWatchlist(data || []);
+      // console.log("WATCHLIST RESPONSE:", data);
+      const updatedStocks = data || [];
 
-      setSelectedStock((prev) => {
-        if (!prev) return data?.[0] || null;
+      setWatchlist(updatedStocks);
 
-        const updated = data?.find((s) => s.asset === prev.asset);
-        return updated || data?.[0] || null;
-      });
-
+      if (selectedStock?.asset === asset) {
+        setSelectedStock(updatedStocks[0] || null);
+      }
     } catch (err) {
-      console.log("Error fetching watchlist", err);
-    } finally {
-      setLoading(false);
+      console.log("Error removing stock", err);
     }
   };
-
-  fetchWatchlist();
-
-  const interval = setInterval(() => {
-    fetchWatchlist();
-  }, 2000); // refresh every 2 sec
-
-  return () => clearInterval(interval);
-
-}, []);
-  const handleRemove = async (asset, e) => {
-  e.stopPropagation();
-
-  try {
-    await API.delete(`/watchlist/${asset}`);
-    const { data } = await API.get("/watchlist");
-// console.log("WATCHLIST RESPONSE:", data);
-    const updatedStocks = data || [];
-
-    setWatchlist(updatedStocks);
-
-    if (selectedStock?.asset === asset) {
-      setSelectedStock(updatedStocks[0] || null);
-    }
-
-  } catch (err) {
-    console.log("Error removing stock", err);
-  }
-};
 
   if (loading) {
     return (
@@ -149,13 +148,35 @@ const WatchlistBox = () => {
         <div className="h-[380px] w-[350px] bg-[#0e0d0d] rounded-xl p-6">
           {selectedStock ? (
             <>
-              <h2 className="text-lg font-semibold text-white hover:cursor-pointer" onClick={() => navigate(`/dashboard/stock/${selectedStock.asset}`)}>
-                {selectedStock.asset}
-              </h2>
-              <p className="text-sm text-gray-400 ">{selectedStock.assetName}</p>
+              <div className="flex items-center gap-4">
+                <img
+                  src={getStockLogo(selectedStock.asset)}
+                  alt={selectedStock.asset}
+                  className="w-15 h-15 rounded-xl bg-white p-1 object-fill"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = defaultStock;
+                  }}
+                />
+
+                <div>
+                  <h2
+                    className="text-2xl font-semibold text-white hover:cursor-pointer"
+                    onClick={() =>
+                      navigate(`/dashboard/stock/${selectedStock.asset}`)
+                    }
+                  >
+                    {selectedStock.asset.replace(".NS", "")}
+                  </h2>
+
+                  <p className="text-sm text-gray-400">
+                    {selectedStock.assetName}
+                  </p>
+                </div>
+              </div>
 
               <div className="mt-6">
-                <p className="text-3xl font-bold text-white">
+                <p className="text-4xl font-bold text-white">
                   ₹ {selectedStock.currentPrice?.toFixed(2)}
                 </p>
                 <p
