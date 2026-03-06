@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Nvidia from "../../assets/nvidia.png";
-import Alphabet from "../../assets/Alphabet.webp";
 import { Trash2 } from "lucide-react";
 import API from "../../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +10,8 @@ const WatchlistBox = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [selectedStock, setSelectedStock] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [similarStocks, setSimilarStocks] = useState([]);
+  const [similarLoading, setSimilarLoading] = useState(false);
 
   useEffect(() => {
     const fetchWatchlist = async () => {
@@ -40,6 +40,31 @@ const WatchlistBox = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const fetchSimilarStocks = async () => {
+      if (!selectedStock) return;
+
+      try {
+        setSimilarLoading(true);
+
+        const { data } = await API.get(
+          `/watchlist/similar/${selectedStock.asset}`,
+        );
+        console.log(data);
+        setSimilarStocks(data || []);
+      } catch (err) {
+        console.log("Error fetching similar stocks", err);
+        setSimilarStocks([]);
+      } finally {
+        setSimilarLoading(false);
+      }
+    };
+
+    fetchSimilarStocks();
+  }, []);
+
+
   const handleRemove = async (asset, e) => {
     e.stopPropagation();
 
@@ -58,28 +83,12 @@ const WatchlistBox = () => {
       console.log("Error removing stock", err);
     }
   };
-
+  
   if (loading) {
     return (
       <div className="text-white text-center py-20">Loading watchlist...</div>
     );
   }
-
-  const similar = [
-    {
-      img: Nvidia,
-      name: "NVIDIA Corp (NVDA)",
-      current: 190.04,
-      returns: { value: 4.05, percentage: -0.16 },
-    },
-    {
-      img: Alphabet,
-      name: "Alphabet Inc (GOOGL)",
-      current: 234.32,
-      returns: { value: 1.32, percentage: 0.03 },
-    },
-  ];
-
   return (
     <div className="flex gap-4">
       <div className="w-230 h-168 rounded-xl bg-[#0e0d0d] flex flex-col p-6">
@@ -208,30 +217,49 @@ const WatchlistBox = () => {
           </div>
 
           <div className="mt-4 flex flex-col gap-4">
-            {similar.map((stock, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between bg-gradient-to-br from-[#141414] to-[#0f0f0f] px-5 py-4 rounded-2xl border border-white/5 hover:border-indigo-500/40 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
-              >
-                <div className="flex flex-col">
-                  <span className="text-white font-semibold text-sm">
-                    {stock.name}
-                  </span>
-                  <span className="text-xs text-gray-400 mt-1">
-                    ${stock.current}
-                  </span>
-                </div>
-
+            {similarLoading ? (
+              <p className="text-gray-400 text-sm">Loading...</p>
+            ) : similarStocks.length === 0 ? (
+              <p className="text-gray-500 text-sm">No similar stocks found</p>
+            ) : (
+              similarStocks.map((stock, index) => (
                 <div
-                  className={`text-sm font-semibold ${
-                    stock.returns.value >= 0 ? "text-green-400" : "text-red-400"
-                  }`}
+                  key={index}
+                  onClick={() => navigate(`/dashboard/stock/${stock.symbol}`)}
+                  className="flex items-center justify-between bg-gradient-to-br from-[#141414] to-[#0f0f0f] px-5 py-4 rounded-2xl border border-white/5 hover:border-indigo-500/40 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
                 >
-                  {stock.returns.value >= 0 ? "+" : ""}
-                  {stock.returns.value}
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={getStockLogo(stock.symbol)}
+                      alt={stock.symbol}
+                      className="w-8 h-8 rounded-md bg-white p-1"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = defaultStock;
+                      }}
+                    />
+
+                    <div className="flex flex-col">
+                      <span className="text-white font-semibold text-sm">
+                        {stock.symbol}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-1">
+                        ₹{stock.price?.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`text-sm font-semibold ${
+                      stock.change >= 0 ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    {stock.change >= 0 ? "+" : ""}
+                    {stock.change?.toFixed(2)}%
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -20,9 +20,7 @@ export const addToWatchlist = async (req, res) => {
       return res.status(201).json(watchlist);
     }
 
-    const exists = watchlist.stocks.find(
-      (item) => item.asset === asset
-    );
+    const exists = watchlist.stocks.find((item) => item.asset === asset);
 
     if (exists) {
       return res.status(400).json({
@@ -52,18 +50,14 @@ export const getWatchlist = async (req, res) => {
     const enrichedStocks = await Promise.all(
       watchlist.stocks.map(async (stock) => {
         try {
-          const quote = await yahooFinance.quote(
-            stock.asset + ".NS"
-          );
+          const quote = await yahooFinance.quote(stock.asset + ".NS");
 
           return {
             asset: stock.asset,
             assetName: stock.assetName,
             currentPrice: quote.regularMarketPrice || 0,
-            dayChange:
-              quote.regularMarketChange || 0,
-            dayPercent:
-              quote.regularMarketChangePercent || 0,
+            dayChange: quote.regularMarketChange || 0,
+            dayPercent: quote.regularMarketChangePercent || 0,
           };
         } catch {
           return {
@@ -74,7 +68,7 @@ export const getWatchlist = async (req, res) => {
             dayPercent: 0,
           };
         }
-      })
+      }),
     );
 
     res.json(enrichedStocks);
@@ -90,7 +84,7 @@ export const removeFromWatchlist = async (req, res) => {
     const updated = await Watchlist.findOneAndUpdate(
       { user: req.user._id },
       { $pull: { stocks: { asset } } },
-      { new: true }
+      { new: true },
     );
 
     if (!updated) {
@@ -104,18 +98,14 @@ export const removeFromWatchlist = async (req, res) => {
     const enrichedStocks = await Promise.all(
       updated.stocks.map(async (stock) => {
         try {
-          const quote = await yahooFinance.quote(
-            stock.asset + ".NS"
-          );
+          const quote = await yahooFinance.quote(stock.asset + ".NS");
 
           return {
             asset: stock.asset,
             assetName: stock.assetName,
             currentPrice: quote.regularMarketPrice || 0,
-            dayChange:
-              quote.regularMarketChange || 0,
-            dayPercent:
-              quote.regularMarketChangePercent || 0,
+            dayChange: quote.regularMarketChange || 0,
+            dayPercent: quote.regularMarketChangePercent || 0,
           };
         } catch {
           return {
@@ -126,12 +116,67 @@ export const removeFromWatchlist = async (req, res) => {
             dayPercent: 0,
           };
         }
-      })
+      }),
     );
 
     res.status(200).json(enrichedStocks);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const getSimilarStocks = async (req, res) => {
+  try {
+    let { symbol } = req.params;
+
+    if (!symbol.includes(".")) {
+      symbol = `${symbol}.NS`;
+    }
+
+    const profile = await yahooFinance.quoteSummary(symbol, {
+      modules: ["assetProfile"],
+    });
+
+    const industry = profile?.assetProfile?.industry;
+    const companyName =
+      profile?.assetProfile?.longBusinessSummary?.split(" ")[0];
+
+    console.log("Industry:", industry);
+    console.log("Search keyword:", companyName);
+
+    if (!companyName) {
+      return res.json([]);
+    }
+
+    const search = await yahooFinance.search(companyName);
+
+    const stocks = search.quotes
+      ?.filter(
+        (q) => q.symbol && q.symbol.endsWith(".NS") && q.symbol !== symbol,
+      )
+      .slice(0, 2);
+    const similarStocks = await Promise.all(
+      stocks.map(async (stock) => {
+        try {
+          const quote = await yahooFinance.quote(stock.symbol);
+
+          return {
+            symbol: stock.symbol.replace(".NS", ""),
+            name: quote.shortName || stock.shortname,
+            price: quote.regularMarketPrice || 0,
+            change: quote.regularMarketChangePercent || 0,
+          };
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    res.json(similarStocks.filter(Boolean));
+  } catch (error) {
+    console.error("SIMILAR STOCK ERROR:", error);
+    res.status(500).json({
+      message: "Failed to fetch similar stocks",
+    });
   }
 };

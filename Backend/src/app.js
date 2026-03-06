@@ -18,4 +18,5 @@ app.use("/api/news", newsRoutes);
 app.use("/api/market", marketRoutes);
 app.use("/api/trade", tradeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
 export default app;

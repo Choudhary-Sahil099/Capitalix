@@ -57,25 +57,31 @@ export const searchStocks = (req, res) => {
 export const getStockQuote = async (req, res) => {
   try {
     let { symbol } = req.params;
-
     if (!symbol.includes(".")) {
       symbol = `${symbol}.NS`;
     }
-
     const quote = await yahooFinance.quote(symbol);
+    if (!quote || !quote.symbol) {
+      return res.status(404).json({
+        message: "Stock not found or no data available",
+      });
+    }
 
     res.json({
       symbol: quote.symbol,
-      name: quote.shortName,
-      price: quote.regularMarketPrice,
-      change: quote.regularMarketChangePercent,
+      name: quote.shortName || quote.longName || symbol,
+      price: quote.regularMarketPrice || 0,
+      change: quote.regularMarketChangePercent || 0,
     });
+
   } catch (error) {
-    console.error("QUOTE ERROR:", error);
-    res.status(500).json({ message: "Error fetching quote" });
+    console.error("QUOTE ERROR:", error.message);
+
+    res.status(500).json({
+      message: "Error fetching quote",
+    });
   }
 };
-
 export const getStockChart = async (req, res) => {
   try {
     let { symbol } = req.params;

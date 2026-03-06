@@ -4,6 +4,9 @@ import { Plus } from "lucide-react";
 import API from "../../api/axios";
 import { createChart, CandlestickSeries } from "lightweight-charts";
 import toast from "react-hot-toast";
+import getStockLogo from "../../utils/getStockLogo";
+import defaultStock from "../../assets/DefaultStock.png";
+
 const ranges = ["1d", "1w", "1m", "6m", "1y"];
 
 const StockDetails = () => {
@@ -201,9 +204,18 @@ const StockDetails = () => {
         <div className="flex-1">
           {stockInfo && (
             <div className="mb-4">
-              <div className="flex gap-5 items-center">
+              <div className="flex gap-2 items-center">
+                <img 
+                src={getStockLogo(stockInfo.symbol.replace(".NS",""))}
+                alt={stockInfo.name}
+                onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = defaultStock;
+                }}
+                className="h-7 w-7 object-cover rounded-sm"
+                />
                 <h1 className="text-3xl font-bold">
-                  {stockInfo.symbol}
+                  {stockInfo.symbol.replace(".NS","")}
                 </h1>
                 <Plus
                   onClick={handleAddToWatchlist}
