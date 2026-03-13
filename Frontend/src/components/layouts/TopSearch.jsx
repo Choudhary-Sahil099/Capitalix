@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Sun, Bell, CircleUser } from "lucide-react";
+import { Sun, CircleUser } from "lucide-react";
 import API from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -77,16 +77,14 @@ const TopSearch = () => {
       </div>
 
       <div className="flex gap-6 justify-center items-center text-white">
-        <Bell size={28} onClick={() => toast.error("Available soon")} />
-
         <div className="flex justify-center items-center gap-2">
-          <CircleUser size={28} />
+          <CircleUser size={28}  className="hover:cursor-pointer"/>
           <span className="text-md text-[#6b6a6a]">
             {user ? user.name : "Loading..."}
           </span>
         </div>
 
-        <Sun size={28}  onClick={() => toast.error("Available soon")}/>
+        <Sun size={28}  onClick={() => toast.error("Available soon")} className="hover:cursor-pointer"/>
       </div>
     </div>
   );

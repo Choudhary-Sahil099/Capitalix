@@ -323,7 +323,7 @@ const StockDetails = () => {
 
         <div
           ref={chartContainerRef}
-          className="w-full h-[500px] rounded-2xl border border-gray-800"
+          className="w-full h-125 rounded-2xl border border-gray-800"
         />
       </div>
     </div>

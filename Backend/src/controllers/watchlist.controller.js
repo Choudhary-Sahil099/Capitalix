@@ -138,23 +138,30 @@ export const getSimilarStocks = async (req, res) => {
     });
 
     const industry = profile?.assetProfile?.industry;
-    const companyName =
-      profile?.assetProfile?.longBusinessSummary?.split(" ")[0];
 
     console.log("Industry:", industry);
-    console.log("Search keyword:", companyName);
 
-    if (!companyName) {
+    if (!industry) {
       return res.json([]);
     }
 
-    const search = await yahooFinance.search(companyName);
+    const search = await yahooFinance.search(industry);
+
+    console.log("Search results:", search?.quotes);
+
+    if (!search || !search.quotes) {
+      return res.json([]);
+    }
 
     const stocks = search.quotes
-      ?.filter(
-        (q) => q.symbol && q.symbol.endsWith(".NS") && q.symbol !== symbol,
+      .filter(
+        (q) =>
+          q.symbol &&
+          q.symbol.endsWith(".NS") &&
+          q.symbol !== symbol
       )
       .slice(0, 2);
+
     const similarStocks = await Promise.all(
       stocks.map(async (stock) => {
         try {
@@ -169,14 +176,17 @@ export const getSimilarStocks = async (req, res) => {
         } catch {
           return null;
         }
-      }),
+      })
     );
 
     res.json(similarStocks.filter(Boolean));
+
   } catch (error) {
     console.error("SIMILAR STOCK ERROR:", error);
+
     res.status(500).json({
       message: "Failed to fetch similar stocks",
+      error: error.message
     });
   }
 };
