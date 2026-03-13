@@ -182,7 +182,7 @@ const StockDetails = () => {
       setTradeError("");
 
       await API.post("/transactions", {
-        asset: stockInfo.symbol,
+        asset: stockInfo.symbol.replace(".NS",""),
         name: stockInfo.name,
         type,
         quantity: Number(quantity),

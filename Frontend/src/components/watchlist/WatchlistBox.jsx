@@ -99,7 +99,7 @@ const WatchlistBox = () => {
       setTradeError("");
 
       await API.post("/transactions", {
-        asset: selectedStock.asset,
+        asset: selectedStock.asset.replace(".NS",""),
         name: selectedStock.assetName,
         type,
         quantity: Number(quantity),
