@@ -10,6 +10,7 @@ import Explore from "./pages/Explore/Explore";
 import Trade from "./pages/Trade/Trade";
 import Market from "./pages/Market/Market";
 import StockVis from "./pages/stockpage/StockVis";
+import Account from "./pages/Account/Account"
 
 function App() {
   return (
@@ -31,8 +32,9 @@ function App() {
         <Route path="explore" element={<Explore />} />
         <Route path="trade" element={<Trade />} />
         <Route path="market" element={<Market />} />
-
+        <Route path="account" element={<Account/>} />
         <Route path="stock/:symbol" element={<StockVis />} />
+
       </Route>
     </Routes>
   );

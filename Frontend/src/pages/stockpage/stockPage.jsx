@@ -69,26 +69,34 @@ const StockDetails = () => {
       setLoading(true);
 
       try {
-        const res = await API.get(
-          `/market/chart/${symbol}?range=${range}`
-        );
+        const res = await API.get(`/market/chart/${symbol}?range=${range}`);
 
-        const formattedData = res.data.map((item) => {
-          const date = new Date(item.date);
+        const formattedData = res.data
+          .map((item) => {
+            const date = new Date(item.date);
 
-          const time =
-            range === "1d" || range === "1w" || range === "1m"
-              ? Math.floor(date.getTime() / 1000)
-              : date.toISOString().split("T")[0];
+            const time =
+              range === "1d" || range === "1w" || range === "1m"
+                ? Math.floor(date.getTime() / 1000)
+                : date.toISOString().split("T")[0];
 
-          return {
-            time,
-            open: item.open,
-            high: item.high,
-            low: item.low,
-            close: item.close,
-          };
-        });
+            return {
+              time,
+              open: item.open,
+              high: item.high,
+              low: item.low,
+              close: item.close,
+            };
+          })
+          .sort((a, b) => {
+            if (typeof a.time === "string")
+              return new Date(a.time) - new Date(b.time);
+            return a.time - b.time;
+          })
+          .filter((item, index, arr) => {
+            if (index === 0) return true;
+            return item.time !== arr[index - 1].time;
+          });
 
         candleSeriesRef.current.setData(formattedData);
         chartRef.current.timeScale().fitContent();
@@ -97,7 +105,6 @@ const StockDetails = () => {
           lastCandleTimeRef.current =
             formattedData[formattedData.length - 1].time;
         }
-
       } catch (err) {
         console.error(err);
       } finally {
@@ -125,7 +132,6 @@ const StockDetails = () => {
           low: data.price,
           close: data.price,
         });
-
       } catch (err) {
         console.error(err);
       }
@@ -141,9 +147,7 @@ const StockDetails = () => {
     const checkWatchlist = async () => {
       try {
         const res = await API.get("/watchlist");
-        const exists = res.data.some(
-          (item) => item.asset === symbol
-        );
+        const exists = res.data.some((item) => item.asset === symbol);
         setIsInWatchlist(exists);
       } catch (err) {
         console.error(err);
@@ -182,7 +186,7 @@ const StockDetails = () => {
       setTradeError("");
 
       await API.post("/transactions", {
-        asset: stockInfo.symbol.replace(".NS",""),
+        asset: stockInfo.symbol.replace(".NS", ""),
         name: stockInfo.name,
         type,
         quantity: Number(quantity),
@@ -190,9 +194,7 @@ const StockDetails = () => {
 
       toast.success("order placed");
     } catch (err) {
-      setTradeError(
-        err.response?.data?.message || "Transaction failed"
-      );
+      setTradeError(err.response?.data?.message || "Transaction failed");
     } finally {
       setTradeLoading(false);
     }
@@ -205,17 +207,17 @@ const StockDetails = () => {
           {stockInfo && (
             <div className="mb-4">
               <div className="flex gap-2 items-center">
-                <img 
-                src={getStockLogo(stockInfo.symbol.replace(".NS",""))}
-                alt={stockInfo.name}
-                onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = defaultStock;
-                }}
-                className="h-7 w-7 object-cover rounded-sm"
+                <img
+                  src={getStockLogo(stockInfo.symbol.replace(".NS", ""))}
+                  alt={stockInfo.name}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = defaultStock;
+                  }}
+                  className="h-7 w-7 object-cover rounded-sm"
                 />
                 <h1 className="text-3xl font-bold">
-                  {stockInfo.symbol.replace(".NS","")}
+                  {stockInfo.symbol.replace(".NS", "")}
                 </h1>
                 <Plus
                   onClick={handleAddToWatchlist}
@@ -223,22 +225,14 @@ const StockDetails = () => {
                     isInWatchlist
                       ? "bg-green-500 text-black border-green-500"
                       : "border-white hover:bg-white hover:text-black"
-                  } ${
-                    watchlistLoading
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
+                  } ${watchlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 />
               </div>
 
-              <p className="text-gray-400">
-                {stockInfo.name}
-              </p>
+              <p className="text-gray-400">{stockInfo.name}</p>
 
               <div className="flex items-center gap-4 mt-2">
-                <span className="text-4xl font-bold">
-                  ₹{stockInfo.price}
-                </span>
+                <span className="text-4xl font-bold">₹{stockInfo.price}</span>
 
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -283,15 +277,11 @@ const StockDetails = () => {
 
           <div className="text-gray-400 mb-3">
             Total: ₹
-            {stockInfo
-              ? (stockInfo.price * quantity).toFixed(2)
-              : "0.00"}
+            {stockInfo ? (stockInfo.price * quantity).toFixed(2) : "0.00"}
           </div>
 
           {tradeError && (
-            <div className="text-red-400 text-sm mb-2">
-              {tradeError}
-            </div>
+            <div className="text-red-400 text-sm mb-2">{tradeError}</div>
           )}
 
           <div className="flex gap-3">

@@ -17,6 +17,7 @@ const OverView = ({ overview }) => {
       value: `₹${overview?.availableBalance?.toFixed(2) || 0}`,
     },
   ];
+  console.log(overview.totalPnL);
 
   return (
     <div className="w-72 bg-[#0e0d0d] rounded-xl p-4">
