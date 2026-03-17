@@ -1,10 +1,14 @@
 import React from "react";
 import Avatar from "../../assets/Avatar.png";
+import { PencilLine } from 'lucide-react';
 const AccountBox = () => {
   return (
     <div className="flex gap-6">
       <div className="flex flex-col gap-5">
-        <div className="bg-[#0e0d0d] w-120 h-90 rounded-xl p-6 flex flex-col gap-6">
+        <div className="bg-[#0e0d0d] w-120 h-90 rounded-xl p-6 flex flex-col gap-6 relative">
+          <button className="absolute top-6 right-6 text-white hover:cursor-pointer">
+            <PencilLine />
+          </button>
           <div className="flex items-center gap-4">
             <img src={Avatar} className="h-24 w-24 rounded-xl cursor-pointer" />
 
@@ -47,7 +51,6 @@ const AccountBox = () => {
 
           <p className="text-gray-500 text-sm">Joined March 2026</p>
         </div>
-
 
         {/* this section will show badges for the different Achievements and in the future we will upgrade them */}
         <div className="bg-[#0e0d0d] w-120 h-74 rounded-xl p-5">

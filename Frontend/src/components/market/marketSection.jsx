@@ -5,18 +5,19 @@ import { useNavigate } from "react-router-dom";
 
 const IndexCard = ({ item }) => {
   const navigate = useNavigate();
-  const isPositive = item.percent >= 0;
+  const isPositive = (item.percent ?? 0) >= 0;
 
   return (
     <div
-    onClick={() => navigate(`/dashboard/stock/${item.symbol}`)}
-    className="bg-gradient-to-br from-[#141414] to-[#0f0f0f] p-6 rounded-2xl shadow-lg hover:scale-[1.02] transition-all duration-300 border border-[#1f1f1f]">
+      onClick={() => navigate(`/dashboard/stock/${item.symbol}`)}
+      className="bg-linear-to-br from-[#141414] to-[#0f0f0f] p-6 rounded-2xl shadow-lg hover:scale-[1.02] transition-all duration-300 border border-[#1f1f1f] cursor-pointer"
+    >
       <h3 className="text-gray-400 text-sm uppercase tracking-wide">
         {item.name}
       </h3>
 
       <p className="text-white text-2xl font-semibold mt-2">
-        ₹{item.price?.toLocaleString()}
+        ₹{item.price?.toLocaleString() ?? "--"}
       </p>
 
       <div
@@ -25,7 +26,8 @@ const IndexCard = ({ item }) => {
         }`}
       >
         {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-        {item.change?.toFixed(2)} ({item.percent?.toFixed(2)}%)
+        {item.change?.toFixed?.(2) ?? "--"} ({item.percent?.toFixed?.(2) ?? "--"}
+        %)
       </div>
     </div>
   );
@@ -33,47 +35,50 @@ const IndexCard = ({ item }) => {
 
 const MoversCard = ({ title, data }) => {
   const navigate = useNavigate();
+
   return (
     <div className="bg-[#121212] p-6 rounded-2xl shadow-lg border border-[#1f1f1f]">
-      <h3 className="text-white text-lg font-semibold mb-4">
-        {title}
-      </h3>
+      <h3 className="text-white text-lg font-semibold mb-4">{title}</h3>
 
-      <div className="flex flex-col gap-4">
-        {data.map((item) => {
-          const isPositive = item.percent >= 0;
+      {data?.length === 0 ? (
+        <p className="text-gray-500 text-sm">No data available</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {data?.map((item) => {
+            const isPositive = (item.percent ?? 0) >= 0;
 
-          return (
-            <div
-              key={item.symbol}
-              onClick={() => navigate(`/dashboard/stock/${item.symbol}`)}
-              className="flex justify-between items-center hover:bg-[#1c1c1c] p-2 rounded-lg transition-all cursor-pointer"
-            >
-              <div>
-                <div className="text-white font-semibold">
-                  {item.symbol}
-                </div>
-                <div className="text-gray-500 text-sm">
-                  ₹{item.price?.toLocaleString()}
-                </div>
-              </div>
-
+            return (
               <div
-                className={`flex items-center gap-1 font-semibold ${
-                  isPositive ? "text-green-400" : "text-red-400"
-                }`}
+                key={item.symbol}
+                onClick={() => navigate(`/dashboard/stock/${item.symbol}`)}
+                className="flex justify-between items-center hover:bg-[#1c1c1c] p-2 rounded-lg transition-all cursor-pointer"
               >
-                {isPositive ? (
-                  <ArrowUpRight size={16} />
-                ) : (
-                  <ArrowDownRight size={16} />
-                )}
-                {item.percent?.toFixed(2)}%
+                <div>
+                  <div className="text-white font-semibold">
+                    {item.symbol.replace(".NS", "")}
+                  </div>
+                  <div className="text-gray-500 text-sm">
+                    ₹{item.price?.toLocaleString() ?? "--"}
+                  </div>
+                </div>
+
+                <div
+                  className={`flex items-center gap-1 font-semibold ${
+                    isPositive ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  {isPositive ? (
+                    <ArrowUpRight size={16} />
+                  ) : (
+                    <ArrowDownRight size={16} />
+                  )}
+                  {item.percent?.toFixed?.(2) ?? "--"}%
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
@@ -83,33 +88,38 @@ const MarketSection = () => {
   const [gainers, setGainers] = useState([]);
   const [losers, setLosers] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        const indicesRes = await API.get("/market/indices");
-        const moversRes = await API.get("/market/movers");
+        const [indicesRes, moversRes] = await Promise.all([
+          API.get("/market/indices"),
+          API.get("/market/movers"),
+        ]);
 
-        setIndices(indicesRes.data);
-        setGainers(moversRes.data.gainers);
-        setLosers(moversRes.data.losers);
+        setIndices(indicesRes.data ?? []);
+        setGainers(moversRes.data?.gainers ?? []);
+        setLosers(moversRes.data?.losers ?? []);
         setLastUpdated(new Date());
       } catch (err) {
         console.error("Market fetch error:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchMarketData();
-    const interval = setInterval(fetchMarketData, 10000); // fetching the market after every 30sec to make it ideal 
+
+    const interval = setInterval(fetchMarketData, 10000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="bg-black min-h-screen py-2 flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-white text-2xl font-semibold">
-          Market Overview
-        </h2>
+        <h2 className="text-white text-2xl font-semibold">Market Overview</h2>
+
         {lastUpdated && (
           <span className="text-gray-500 text-sm">
             Updated {lastUpdated.toLocaleTimeString()}
@@ -117,15 +127,21 @@ const MarketSection = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {indices.map((item) => (
-          <IndexCard key={item.symbol} item={item} />
-        ))}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <MoversCard title="Top Gainers" data={gainers} />
-        <MoversCard title="Top Losers" data={losers} />
-      </div>
+      {loading ? (
+        <div className="text-gray-500 text-sm">Loading market data...</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {indices?.map((item) => (
+              <IndexCard key={item.symbol} item={item} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <MoversCard title="Top Gainers" data={gainers} />
+            <MoversCard title="Top Losers" data={losers} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
