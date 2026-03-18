@@ -7,6 +7,7 @@ import newsRoutes from "./routes/news.routes.js";
 import marketRoutes from "./routes/market.routes.js";
 import tradeRoutes from "./routes/trade.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -18,5 +19,5 @@ app.use("/api/news", newsRoutes);
 app.use("/api/market", marketRoutes);
 app.use("/api/trade", tradeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-
+app.use("/api/notifications", notificationRoutes);
 export default app;

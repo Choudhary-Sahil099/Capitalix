@@ -81,7 +81,7 @@ const UserGraph = ({ positions = [], balance = 0, transactions = [] }) => {
   }, [transactions, range]);
 
   return (
-    <div className="bg-[#0e0d0d] rounded-2xl p-6 w-full min-h-[420px] flex flex-col">
+    <div className="bg-[#0e0d0d] rounded-2xl p-6 w-full min-h-105 flex flex-col">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h2 className="text-[#a8a8a8] text-sm">Portfolio Value</h2>

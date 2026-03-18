@@ -99,10 +99,16 @@ const WatchlistBox = () => {
       setTradeError("");
 
       await API.post("/transactions", {
-        asset: selectedStock.asset.replace(".NS",""),
+        asset: selectedStock.asset.replace(".NS", ""),
         name: selectedStock.assetName,
         type,
         quantity: Number(quantity),
+      });
+
+      await API.post("/notifications", {
+        type: "trade",
+        title: "Order Executed",
+        message: `${type === "buy" ? "Bought" : "Sold"} ${quantity} shares of ${selectedStock.asset}`,
       });
 
       toast.success("Order placed");
