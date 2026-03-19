@@ -1,5 +1,6 @@
 import Watchlist from "../models/Watchlist.js";
 import YahooFinance from "yahoo-finance2";
+import { checkWatchlistAlerts } from "../services/watchlist.services.js";
 const yahooFinance = new YahooFinance({
   suppressNotices: ["yahooSurvey"],
 });
@@ -70,7 +71,7 @@ export const getWatchlist = async (req, res) => {
         }
       }),
     );
-
+    await checkWatchlistAlerts(req.user._id, enrichedStocks, watchlist);
     res.json(enrichedStocks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -155,10 +156,7 @@ export const getSimilarStocks = async (req, res) => {
 
     const stocks = search.quotes
       .filter(
-        (q) =>
-          q.symbol &&
-          q.symbol.endsWith(".NS") &&
-          q.symbol !== symbol
+        (q) => q.symbol && q.symbol.endsWith(".NS") && q.symbol !== symbol,
       )
       .slice(0, 2);
 
@@ -176,17 +174,16 @@ export const getSimilarStocks = async (req, res) => {
         } catch {
           return null;
         }
-      })
+      }),
     );
 
     res.json(similarStocks.filter(Boolean));
-
   } catch (error) {
     console.error("SIMILAR STOCK ERROR:", error);
 
     res.status(500).json({
       message: "Failed to fetch similar stocks",
-      error: error.message
+      error: error.message,
     });
   }
 };

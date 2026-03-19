@@ -2,7 +2,7 @@ import React from "react";
 
 const TransactionHistory = ({ transactions }) => {
   return (
-    <div className="w-120 h-54 bg-[#0e0d0d] rounded-xl p-4 flex flex-col text-white">
+    <div className="w-120 h-60 bg-[#0e0d0d] rounded-xl p-4 flex flex-col text-white">
       <h2 className="text-sm font-semibold mb-2">Last Transactions</h2>
 
       <div className="flex-1 overflow-hidden">
@@ -16,7 +16,7 @@ const TransactionHistory = ({ transactions }) => {
             </tr>
           </thead>
 
-          <tbody className="block h-32 overflow-y-auto hide-scrollbar pt-1">
+          <tbody className="block h-40 overflow-y-auto hide-scrollbar pt-1">
             {transactions && transactions.length > 0 ? (
               transactions.map((tx) => (
                 <tr

@@ -1,4 +1,5 @@
-import Notification from "../models/Notification";
+import Notification from "../models/Notification.js";
+
 export const createNotification = async ({
   userId,
   type,
@@ -6,6 +7,14 @@ export const createNotification = async ({
   message,
   data = {},
 }) => {
+  // prevent duplicate notifications
+  const exists = await Notification.findOne({
+    userId,
+    message,
+  });
+
+  if (exists) return;
+
   return await Notification.create({
     userId,
     type,

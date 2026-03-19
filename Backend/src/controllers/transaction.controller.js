@@ -1,4 +1,5 @@
 import Transaction from "../models/Transaction.js";
+import { createNotification } from "../services/notification.services.js";
 import Wallet from "../models/Wallet.js";
 import YahooFinance from "yahoo-finance2";
 import { v4 as uuidv4 } from "uuid";
@@ -8,6 +9,7 @@ const yahooFinance = new YahooFinance({
 export const addTransaction = async (req, res) => {
   try {
     const { asset, name, type, quantity } = req.body;
+    const userID = req.user._id;
 
     if (!asset || !name || !type || !quantity) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -74,6 +76,12 @@ export const addTransaction = async (req, res) => {
     });
 
     await wallet.save();
+    await createNotification({
+      userID,
+      type: "trade",
+      title: "Order Executed",
+      message: `${type === "buy" ? "Bought" : "Sold"} ${quantity} shares of ${asset}`,
+    });
 
     res.status(201).json(transaction);
   } catch (error) {

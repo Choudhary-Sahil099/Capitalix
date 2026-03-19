@@ -13,7 +13,7 @@ const CurrentWatchlist = ({ watchlist = [] }) => {
   }));
 
   return (
-    <div className="w-120 h-54 bg-[#0e0d0d] rounded-xl p-4 flex flex-col text-white">
+    <div className="w-120 h-60 bg-[#0e0d0d] rounded-xl p-4 flex flex-col text-white">
       <h2 className="text-sm font-semibold mb-2">Watchlist</h2>
 
       <div className="flex-1 overflow-hidden">
@@ -27,7 +27,7 @@ const CurrentWatchlist = ({ watchlist = [] }) => {
             </tr>
           </thead>
 
-          <tbody className="block h-32 overflow-y-auto hide-scrollbar">
+          <tbody className="block h-40 overflow-y-auto hide-scrollbar">
             {stocks.length === 0 ? (
               <tr className="table w-full">
                 <td

@@ -1,7 +1,9 @@
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
-import yahooFinance from "yahoo-finance2";
+import YahooFinance from "yahoo-finance2";
+import { createNotification } from "../services/notification.services.js";
 
+const yahooFinance = new YahooFinance();
 
 const getStockPrice = async (symbol) => {
   const quote = await yahooFinance.quote(symbol);
@@ -26,7 +28,6 @@ export const buyStock = async (req, res) => {
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
-
     user.balance -= totalCost;
     await user.save();
 
@@ -39,10 +40,18 @@ export const buyStock = async (req, res) => {
       total: totalCost,
     });
 
+    await createNotification({
+      userId,
+      type: "trade",
+      title: "Order Executed",
+      message: `Bought ${quantity} shares of ${symbol} at ₹${stockPrice}`,
+    });
+
     res.status(200).json({
       message: "Stock purchased successfully",
       balance: user.balance,
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -60,6 +69,7 @@ const getOwnedQuantity = async (userId, symbol) => {
 
   return total;
 };
+
 export const sellStock = async (req, res) => {
   try {
     const { symbol, quantity } = req.body;
@@ -89,7 +99,6 @@ export const sellStock = async (req, res) => {
 
     user.balance += totalReturn;
     await user.save();
-
     await Transaction.create({
       user: userId,
       symbol,
@@ -98,6 +107,20 @@ export const sellStock = async (req, res) => {
       price: stockPrice,
       total: totalReturn,
     });
+    await createNotification({
+      userId,
+      type: "trade",
+      title: "Order Executed",
+      message: `Sold ${qty} shares of ${symbol} at ₹${stockPrice}`,
+    });
+    if (totalReturn > 5000) {
+      await createNotification({
+        userId,
+        type: "portfolio",
+        title: "Portfolio Update",
+        message: `You gained ₹${totalReturn.toFixed(2)} from ${symbol} `,
+      });
+    }
 
     res.status(200).json({
       message: "Stock sold successfully",

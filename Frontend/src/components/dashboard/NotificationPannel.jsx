@@ -4,19 +4,39 @@ import API from "../../api/axios";
 
 const NotificationPannel = () => {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await API.get("/notifications");
+      setNotifications(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const res = await API.get("/notifications");
-        setNotifications(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000);
+
+    return () => clearInterval(interval);
   }, []);
+
+  const markAsRead = async (id) => {
+    try {
+      await API.patch(`/notifications/${id}/read`);
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === id ? { ...n, read: true } : n
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const getIcon = (type) => {
     switch (type) {
@@ -28,6 +48,8 @@ const NotificationPannel = () => {
         return <Bell className="text-blue-400" size={16} />;
       case "news":
         return <Rss className="text-purple-400" size={16} />;
+      case "trade":
+        return <TrendingUp className="text-indigo-400" size={16} />;
       default:
         return <Bell size={16} />;
     }
@@ -40,14 +62,19 @@ const NotificationPannel = () => {
         <Bell className="text-[#aeacac]" />
       </div>
 
-      <div className="flex flex-col gap-3 max-h-96 overflow-y-auto">
-        {notifications.length === 0 ? (
+      <div className="flex flex-col gap-3 max-h-89 overflow-y-auto hide-scrollbar">
+        {loading ? (
+          <p className="text-gray-500 text-sm">Loading...</p>
+        ) : notifications.length === 0 ? (
           <p className="text-gray-500 text-sm">No notifications</p>
         ) : (
           notifications.map((n) => (
             <div
               key={n._id}
-              className="border-b border-[#2a2a2a] pb-2 last:border-none flex gap-2"
+              onClick={() => markAsRead(n._id)}
+              className={`border-b border-[#2a2a2a] last:border-none flex gap-2 cursor-pointer transition ${
+                n.read ? "opacity-60" : "hover:bg-[#141414]"
+              }`}
             >
               {getIcon(n.type)}
 

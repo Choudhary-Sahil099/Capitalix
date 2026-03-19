@@ -14,8 +14,15 @@ const watchlistStockSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  alertSentHigh: {
+    type: Boolean,
+    default: false,
+  },
+  alertSentLow: {
+    type: Boolean,
+    default: false,
+  },
 });
-
 const watchlistSchema = new mongoose.Schema(
   {
     user: {
