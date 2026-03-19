@@ -259,7 +259,7 @@ const WatchlistBox = () => {
                   <button
                     onClick={() => handleTrade("buy")}
                     disabled={tradeLoading}
-                    className="bg-green-500 hover:bg-green-600 text-white p-3 w-35 text-xl rounded-xl"
+                    className="bg-green-500 hover:bg-green-600 text-white p-3 w-35 text-xl rounded-xl hover:cursor-pointer"
                   >
                     Buy
                   </button>
@@ -267,7 +267,7 @@ const WatchlistBox = () => {
                   <button
                     onClick={() => handleTrade("sell")}
                     disabled={tradeLoading}
-                    className="bg-red-500 hover:bg-red-600 text-white p-3 w-35 text-xl rounded-xl"
+                    className="bg-red-500 hover:bg-red-600 text-white p-3 w-35 text-xl rounded-xl hover:cursor-pointer"
                   >
                     Sell
                   </button>

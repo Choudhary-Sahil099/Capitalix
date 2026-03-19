@@ -288,7 +288,7 @@ const StockDetails = () => {
             <button
               onClick={() => handleTrade("buy")}
               disabled={tradeLoading}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full"
+              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md w-full hover:cursor-pointer"
             >
               Buy
             </button>
@@ -296,7 +296,7 @@ const StockDetails = () => {
             <button
               onClick={() => handleTrade("sell")}
               disabled={tradeLoading}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md w-full"
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md w-full hover:cursor-pointer"
             >
               Sell
             </button>
